@@ -18,7 +18,6 @@ Cliente mobile em **Expo SDK 54** com **Expo Router**, **NativeWind**, **TanStac
 2. Ajuste `.env` se necessário:
 
    - `EXPO_PUBLIC_API_URL` — origem do servidor (sem `/api`; o cliente chama `${URL}/api/auth/...`).
-   - `EXPO_PUBLIC_INSTITUTIONAL_EMAIL_DOMAIN` — domínio institucional **sem** `@` (igual a `INSTITUTIONAL_EMAIL_DOMAIN` no Django; por defeito `aluno.wyden.edu.br`).
 
 3. Instale dependências:
 
@@ -56,7 +55,7 @@ Ou `npx expo start`. Depois escolha **Android**, **iOS** ou **web** no terminal 
 | `hooks/useAuth.ts` | Reexporta `useAuth` e `AuthProvider` |
 | `services/api.ts` | Cliente Axios, refresh automático, SecureStore |
 | `schemas/` | Schemas Zod dos formulários |
-| `constants/config.ts` | URL base e domínio de e-mail institucional |
+| `constants/config.ts` | URL base da API e chaves SecureStore |
 
 ## Stack de UI e estilos
 

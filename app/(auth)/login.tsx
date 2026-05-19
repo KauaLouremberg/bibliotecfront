@@ -7,7 +7,6 @@ import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-na
 
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
-import { INSTITUTIONAL_EMAIL_SUFFIX } from '@/constants/config';
 import { useAuth } from '@/hooks/useAuth';
 import { loginSchema, type LoginFormValues } from '@/schemas/auth';
 
@@ -46,7 +45,7 @@ export default function LoginScreen() {
         <View className="w-full max-w-md self-center">
           <Text className="mb-1 text-2xl font-bold text-slate-900 dark:text-slate-50">Bibliotec</Text>
           <Text className="mb-8 text-base text-slate-600 dark:text-slate-300">
-            Entre com o seu e-mail institucional ({INSTITUTIONAL_EMAIL_SUFFIX})
+            Entre com o seu e-mail e palavra-passe.
           </Text>
 
           <Controller

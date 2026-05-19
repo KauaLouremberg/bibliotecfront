@@ -5,10 +5,18 @@ export default function AppGroupLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen
-        name="modal"
+        name="book-form"
         options={{
           presentation: 'modal',
-          title: 'Modal',
+          title: 'Livro do inventário',
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen
+        name="signal-form"
+        options={{
+          presentation: 'modal',
+          title: 'Novo sinal',
           headerShown: true,
         }}
       />

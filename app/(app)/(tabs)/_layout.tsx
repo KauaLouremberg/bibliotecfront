@@ -3,10 +3,6 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Tabs } from 'expo-router';
 import { Pressable } from 'react-native';
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
@@ -15,28 +11,46 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: useClientOnlyValue(false, true),
+        tabBarActiveTintColor: '#c2410c',
+        tabBarInactiveTintColor: '#78716c',
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: '#fffbeb',
+        },
+        headerShadowVisible: false,
+        headerTitleStyle: {
+          color: '#1c1917',
+          fontWeight: '700',
+        },
+        tabBarStyle: {
+          backgroundColor: '#fffaf0',
+          borderTopColor: '#fed7aa',
+          height: 68,
+          paddingBottom: 10,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Início',
-          tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+          title: 'Inventário',
+          tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
           headerRight: () => (
-            <Link href="/modal" asChild>
+            <Link href="/(app)/book-form" asChild>
               <Pressable>
                 {({ pressed }) => (
                   <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+                    name="plus-circle"
+                    size={24}
+                    color="#9a3412"
+                    style={{ marginRight: 16, opacity: pressed ? 0.5 : 1 }}
                   />
                 )}
               </Pressable>
@@ -47,8 +61,22 @@ export default function TabLayout() {
       <Tabs.Screen
         name="two"
         options={{
-          title: 'Explorar',
-          tabBarIcon: ({ color }) => <TabBarIcon name="book" color={color} />,
+          title: 'Conexões',
+          tabBarIcon: ({ color }) => <TabBarIcon name="play-circle" color={color} />,
+          headerRight: () => (
+            <Link href="/(app)/signal-form" asChild>
+              <Pressable>
+                {({ pressed }) => (
+                  <FontAwesome
+                    name="bullhorn"
+                    size={22}
+                    color="#9a3412"
+                    style={{ marginRight: 16, opacity: pressed ? 0.5 : 1 }}
+                  />
+                )}
+              </Pressable>
+            </Link>
+          ),
         }}
       />
     </Tabs>
