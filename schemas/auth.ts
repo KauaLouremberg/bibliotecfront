@@ -26,3 +26,22 @@ export const registerSchema = z
   });
 
 export type RegisterFormValues = z.infer<typeof registerSchema>;
+
+export const profileSchema = z
+  .object({
+    full_name: z.string().trim().min(2, 'Nome completo obrigatório.').max(255, 'Nome muito longo.'),
+    course: z.string().trim().max(120, 'Curso muito longo.'),
+    semester: z.string().trim().max(60, 'Semestre muito longo.'),
+    current_password: z.string(),
+    new_password: z
+      .string()
+      .trim()
+      .refine((value) => value === '' || value.length >= 8, 'Nova palavra-passe: mínimo 8 caracteres.')
+      .refine((value) => value.length <= 128, 'Nova palavra-passe muito longa.'),
+  })
+  .refine((data) => (data.new_password ? data.current_password.length > 0 : true), {
+    message: 'Informe a palavra-passe atual para definir uma nova.',
+    path: ['current_password'],
+  });
+
+export type ProfileFormValues = z.infer<typeof profileSchema>;

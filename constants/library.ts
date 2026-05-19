@@ -83,3 +83,20 @@ export const postIntentTones: Record<
   loan: 'accent',
   offer: 'danger',
 };
+
+export const tradeStatusLabels = {
+  pending: 'Pendente',
+  accepted: 'Aceita',
+  rejected: 'Recusada',
+  completed: 'Concluída',
+} as const;
+
+export const tradeStatusTones: Record<
+  keyof typeof tradeStatusLabels,
+  'warning' | 'accent' | 'danger' | 'success'
+> = {
+  pending: 'warning',
+  accepted: 'accent',
+  rejected: 'danger',
+  completed: 'success',
+};

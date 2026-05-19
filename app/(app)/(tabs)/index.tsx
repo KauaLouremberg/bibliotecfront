@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
-import { Image, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import * as Linking from 'expo-linking';
+import { useDeferredValue, useState } from 'react';
+import { Image, RefreshControl, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { Pill } from '@/components/Pill';
@@ -21,9 +21,15 @@ function StatTile({ value, label }: { value: number; label: string }) {
 }
 
 export default function InventoryScreen() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const [discoverSearch, setDiscoverSearch] = useState('');
+  const [tradeStatusFilter, setTradeStatusFilter] = useState<'loan' | 'exchange' | 'donation' | null>(null);
+  const deferredDiscoverSearch = useDeferredValue(discoverSearch.trim());
   const inventoryQuery = useMyInventory();
-  const discoverQuery = useDiscoverInventory();
+  const discoverQuery = useDiscoverInventory({
+    search: deferredDiscoverSearch,
+    trade_status: tradeStatusFilter,
+  });
   const feedQuery = useCommunityFeed();
 
   const inventory = inventoryQuery.data;
@@ -91,9 +97,9 @@ export default function InventoryScreen() {
             </View>
             <TouchableOpacity
               onPress={() => {
-                void logout();
+                router.push('/(app)/(tabs)/profile');
               }}>
-              <Text className="text-sm font-semibold text-stone-500">Sair</Text>
+              <Text className="text-sm font-semibold text-stone-500">Perfil</Text>
             </TouchableOpacity>
           </View>
 
@@ -199,6 +205,39 @@ export default function InventoryScreen() {
             Livros públicos de outros usuários que podem gerar contato imediato.
           </Text>
 
+          <View className="mt-4">
+            <TextInput
+              value={discoverSearch}
+              onChangeText={setDiscoverSearch}
+              placeholder="Buscar por título ou autor"
+              placeholderTextColor="#a8a29e"
+              className="w-full rounded-2xl border border-stone-200 bg-white px-4 py-3 text-base text-stone-900"
+            />
+
+            <View className="mt-3 flex-row flex-wrap gap-2">
+              {[
+                { value: null, label: 'Todos' },
+                { value: 'loan', label: 'Empréstimo' },
+                { value: 'exchange', label: 'Troca' },
+                { value: 'donation', label: 'Doação' },
+              ].map((option) => {
+                const selected = tradeStatusFilter === option.value;
+                return (
+                  <TouchableOpacity
+                    key={option.label}
+                    className={`rounded-full px-4 py-2 ${selected ? 'bg-stone-900' : 'bg-white'}`}
+                    onPress={() => {
+                      setTradeStatusFilter(option.value as 'loan' | 'exchange' | 'donation' | null);
+                    }}>
+                    <Text className={`text-sm font-semibold ${selected ? 'text-white' : 'text-stone-700'}`}>
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
           {discoverQuery.isPending ? (
             <View className="mt-4 rounded-[28px] bg-white px-5 py-6">
               <Text className="text-base text-stone-600">Carregando comunidade...</Text>
@@ -240,11 +279,14 @@ export default function InventoryScreen() {
                   <Button
                     className="mt-5"
                     onPress={() => {
-                      void Linking.openURL(
-                        `mailto:${book.owner.email}?subject=${encodeURIComponent(`Tenho interesse em ${book.title}`)}`,
-                      );
+                      router.push({
+                        pathname: '/(app)/trade-form',
+                        params: {
+                          requestedBookId: String(book.id),
+                        },
+                      });
                     }}>
-                    Entrar em contato
+                    Propor troca
                   </Button>
                 </View>
               ))}

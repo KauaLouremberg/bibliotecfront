@@ -79,6 +79,20 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Perfil',
+          tabBarIcon: ({ color }) => <TabBarIcon name="user-circle" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="trades"
+        options={{
+          title: 'Negociações',
+          tabBarIcon: ({ color }) => <TabBarIcon name="exchange" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

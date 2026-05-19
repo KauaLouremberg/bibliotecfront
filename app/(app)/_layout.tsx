@@ -20,6 +20,14 @@ export default function AppGroupLayout() {
           headerShown: true,
         }}
       />
+      <Stack.Screen
+        name="trade-form"
+        options={{
+          presentation: 'modal',
+          title: 'Propor troca',
+          headerShown: true,
+        }}
+      />
     </Stack>
   );
 }

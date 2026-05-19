@@ -4,6 +4,8 @@ import { api } from '@/services/api';
 
 export type SharingStatus = 'private' | 'showcase' | 'loan' | 'exchange' | 'donation';
 export type PostIntent = 'need' | 'donation' | 'exchange' | 'loan' | 'offer';
+export type DiscoverTradeStatus = 'loan' | 'exchange' | 'donation';
+export type TradeStatus = 'pending' | 'accepted' | 'rejected' | 'completed';
 
 export type OwnerSummary = {
   id: number;
@@ -73,14 +75,33 @@ export type FeedCollection = {
   stats: FeedStats;
 };
 
+export type TradeRequest = {
+  id: number;
+  status: TradeStatus;
+  message: string;
+  requester: OwnerSummary;
+  owner: OwnerSummary;
+  book_requested: InventoryBookPreview;
+  book_offered: InventoryBookPreview | null;
+  is_incoming: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type TradeRequestCollection = {
+  incoming: TradeRequest[];
+  outgoing: TradeRequest[];
+};
+
 export type InventoryBookPayload = {
   title: string;
   author: string;
   description: string;
-  cover_url: string;
   has_physical_copy: boolean;
   sharing_status: SharingStatus;
   location_label: string;
+  cover?: UploadFileLike | null;
+  remove_cover?: boolean;
 };
 
 export type SocialPostPayload = {
@@ -92,10 +113,29 @@ export type SocialPostPayload = {
   inventory_book_id: number | null;
 };
 
+export type TradeRequestPayload = {
+  book_requested_id: number;
+  book_offered_id: number | null;
+  message: string;
+};
+
+export type UploadFileLike = {
+  uri: string;
+  name: string;
+  type: string;
+};
+
 const libraryQueryKey = ['library'] as const;
 
 function invalidateLibrary(queryClient: ReturnType<typeof useQueryClient>) {
   return queryClient.invalidateQueries({ queryKey: libraryQueryKey });
+}
+
+function appendIfPresent(formData: FormData, key: string, value: string | boolean | number | null | undefined) {
+  if (value === null || value === undefined) {
+    return;
+  }
+  formData.append(key, String(value));
 }
 
 export function useMyInventory() {
@@ -108,11 +148,16 @@ export function useMyInventory() {
   });
 }
 
-export function useDiscoverInventory() {
+export function useDiscoverInventory(filters?: { search?: string; trade_status?: DiscoverTradeStatus | null }) {
   return useQuery({
-    queryKey: [...libraryQueryKey, 'inventory', 'discover'],
+    queryKey: [...libraryQueryKey, 'inventory', 'discover', filters?.search ?? '', filters?.trade_status ?? 'all'],
     queryFn: async () => {
-      const { data } = await api.get<InventoryCollection>('/api/library/inventory/discover');
+      const { data } = await api.get<InventoryCollection>('/api/library/inventory/discover', {
+        params: {
+          search: filters?.search ?? '',
+          trade_status: filters?.trade_status ?? undefined,
+        },
+      });
       return data;
     },
   });
@@ -123,12 +168,29 @@ export function useUpsertInventoryBook() {
 
   return useMutation({
     mutationFn: async (payload: InventoryBookPayload & { id?: number }) => {
-      const { id, ...body } = payload;
+      const { id, cover, remove_cover, ...body } = payload;
+      const formData = new FormData();
+      appendIfPresent(formData, 'title', body.title);
+      appendIfPresent(formData, 'author', body.author);
+      appendIfPresent(formData, 'description', body.description);
+      appendIfPresent(formData, 'location_label', body.location_label);
+      appendIfPresent(formData, 'has_physical_copy', body.has_physical_copy);
+      appendIfPresent(formData, 'sharing_status', body.sharing_status);
+      if (remove_cover) {
+        appendIfPresent(formData, 'remove_cover', true);
+      }
+      if (cover) {
+        formData.append('cover_image', {
+          uri: cover.uri,
+          name: cover.name,
+          type: cover.type,
+        } as never);
+      }
       if (id) {
-        const { data } = await api.patch<InventoryBook>(`/api/library/inventory/${id}`, body);
+        const { data } = await api.patch<InventoryBook>(`/api/library/inventory/${id}`, formData);
         return data;
       }
-      const { data } = await api.post<InventoryBook>('/api/library/inventory', body);
+      const { data } = await api.post<InventoryBook>('/api/library/inventory', formData);
       return data;
     },
     onSuccess: async () => {
@@ -156,6 +218,46 @@ export function useCommunityFeed() {
     queryFn: async () => {
       const { data } = await api.get<FeedCollection>('/api/library/feed');
       return data;
+    },
+  });
+}
+
+export function useMyTrades() {
+  return useQuery({
+    queryKey: [...libraryQueryKey, 'trades', 'mine'],
+    queryFn: async () => {
+      const { data } = await api.get<TradeRequestCollection>('/api/library/trades/mine');
+      return data;
+    },
+  });
+}
+
+export function useCreateTradeRequest() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: TradeRequestPayload) => {
+      const { data } = await api.post<TradeRequest>('/api/library/trades', payload);
+      return data;
+    },
+    onSuccess: async () => {
+      await invalidateLibrary(queryClient);
+    },
+  });
+}
+
+export function useUpdateTradeRequestStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { id: number; status: Exclude<TradeStatus, 'pending'> }) => {
+      const { data } = await api.patch<TradeRequest>(`/api/library/trades/${payload.id}/status`, {
+        status: payload.status,
+      });
+      return data;
+    },
+    onSuccess: async () => {
+      await invalidateLibrary(queryClient);
     },
   });
 }

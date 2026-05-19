@@ -42,6 +42,9 @@ function isPublicAuthPath(url: string | undefined): boolean {
 }
 
 api.interceptors.request.use(async (config) => {
+  if (config.data instanceof FormData && config.headers) {
+    delete (config.headers as Record<string, unknown>)['Content-Type'];
+  }
   if (isPublicAuthPath(config.url)) {
     if (config.headers) {
       delete (config.headers as Record<string, unknown>).Authorization;

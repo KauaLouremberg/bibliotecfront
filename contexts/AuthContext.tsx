@@ -10,6 +10,9 @@ type UserMe = {
   id: number;
   email: string;
   full_name: string;
+  avatar_url: string;
+  course: string;
+  semester: string;
 };
 
 type TokenPair = {
@@ -27,8 +30,18 @@ type AuthContextValue = {
   refetchUser: () => void;
   loginPending: boolean;
   registerPending: boolean;
+  avatarPending: boolean;
+  profilePending: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (payload: { email: string; password: string; full_name: string }) => Promise<void>;
+  updateAvatar: (payload: { file?: { uri: string; name: string; type: string } | null; remove?: boolean }) => Promise<void>;
+  updateProfile: (payload: {
+    full_name: string;
+    course: string;
+    semester: string;
+    current_password?: string;
+    new_password?: string;
+  }) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -98,6 +111,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
+  const avatarMutation = useMutation({
+    mutationFn: async (vars: { file?: { uri: string; name: string; type: string } | null; remove?: boolean }) => {
+      const formData = new FormData();
+      if (vars.remove) {
+        formData.append('remove_avatar', 'true');
+      }
+      if (vars.file) {
+        formData.append('avatar', {
+          uri: vars.file.uri,
+          name: vars.file.name,
+          type: vars.file.type,
+        } as never);
+      }
+      const { data } = await api.patch<UserMe>('/api/auth/profile/avatar', formData);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+    },
+  });
+
+  const profileMutation = useMutation({
+    mutationFn: async (vars: {
+      full_name: string;
+      course: string;
+      semester: string;
+      current_password?: string;
+      new_password?: string;
+    }) => {
+      const { data } = await api.patch<UserMe>('/api/auth/profile', vars);
+      return data;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+    },
+  });
+
   const login = useCallback(
     async (email: string, password: string) => {
       await loginMutation.mutateAsync({ email: email.trim().toLowerCase(), password });
@@ -122,6 +172,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryClient.removeQueries({ queryKey: ['auth', 'me'] });
   }, [queryClient]);
 
+  const updateAvatar = useCallback(
+    async (payload: { file?: { uri: string; name: string; type: string } | null; remove?: boolean }) => {
+      await avatarMutation.mutateAsync(payload);
+    },
+    [avatarMutation],
+  );
+
+  const updateProfile = useCallback(
+    async (payload: {
+      full_name: string;
+      course: string;
+      semester: string;
+      current_password?: string;
+      new_password?: string;
+    }) => {
+      await profileMutation.mutateAsync(payload);
+    },
+    [profileMutation],
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       accessToken,
@@ -135,8 +205,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       },
       loginPending: loginMutation.isPending,
       registerPending: registerMutation.isPending,
+      avatarPending: avatarMutation.isPending,
+      profilePending: profileMutation.isPending,
       login,
       register,
+      updateAvatar,
+      updateProfile,
       logout,
     }),
     [
@@ -148,8 +222,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       meQuery.refetch,
       loginMutation.isPending,
       registerMutation.isPending,
+      avatarMutation.isPending,
+      profileMutation.isPending,
       login,
       register,
+      updateAvatar,
+      updateProfile,
       logout,
     ],
   );
