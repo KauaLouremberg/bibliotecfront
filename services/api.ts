@@ -1,8 +1,8 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
-import * as SecureStore from 'expo-secure-store';
 
 import { API_URL, SECURE_ACCESS_KEY, SECURE_REFRESH_KEY } from '@/constants/config';
 import { emitSessionCleared } from '@/utils/authEvents';
+import { deleteSecureItem, getSecureItem, setSecureItem } from '@/utils/secureStorage';
 
 export const api = axios.create({
   baseURL: API_URL.replace(/\/$/, ''),
@@ -19,17 +19,17 @@ const raw = axios.create({
 });
 
 async function getAccessToken(): Promise<string | null> {
-  return SecureStore.getItemAsync(SECURE_ACCESS_KEY);
+  return getSecureItem(SECURE_ACCESS_KEY);
 }
 
 export async function persistTokens(access: string, refresh: string): Promise<void> {
-  await SecureStore.setItemAsync(SECURE_ACCESS_KEY, access);
-  await SecureStore.setItemAsync(SECURE_REFRESH_KEY, refresh);
+  await setSecureItem(SECURE_ACCESS_KEY, access);
+  await setSecureItem(SECURE_REFRESH_KEY, refresh);
 }
 
 export async function clearStoredTokens(): Promise<void> {
-  await SecureStore.deleteItemAsync(SECURE_ACCESS_KEY);
-  await SecureStore.deleteItemAsync(SECURE_REFRESH_KEY);
+  await deleteSecureItem(SECURE_ACCESS_KEY);
+  await deleteSecureItem(SECURE_REFRESH_KEY);
 }
 
 function isPublicAuthPath(url: string | undefined): boolean {
@@ -75,7 +75,7 @@ api.interceptors.response.use(
       !original.url?.includes('/api/auth/register')
     ) {
       original._retry = true;
-      const refresh = await SecureStore.getItemAsync(SECURE_REFRESH_KEY);
+      const refresh = await getSecureItem(SECURE_REFRESH_KEY);
       if (!refresh) {
         await clearStoredTokens();
         emitSessionCleared();

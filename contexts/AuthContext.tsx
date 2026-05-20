@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { router } from 'expo-router';
 
 import { SECURE_ACCESS_KEY } from '@/constants/config';
+import { getSecureItem } from '@/utils/secureStorage';
 import { api, clearStoredTokens, persistTokens } from '@/services/api';
 import { subscribeSessionCleared } from '@/utils/authEvents';
+import { showWarningToast } from '@/utils/feedback';
 
 type UserMe = {
   id: number;
@@ -56,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
-        const stored = await SecureStore.getItemAsync(SECURE_ACCESS_KEY);
+        const stored = await getSecureItem(SECURE_ACCESS_KEY);
         if (!cancelled) {
           setAccessToken(stored);
         }
@@ -73,10 +75,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     return subscribeSessionCleared(() => {
+      if (accessToken) {
+        showWarningToast('Sessão expirada', 'Entre novamente para continuar.');
+      }
       setAccessToken(null);
       queryClient.removeQueries({ queryKey: ['auth', 'me'] });
     });
-  }, [queryClient]);
+  }, [accessToken, queryClient]);
 
   const meQuery = useQuery({
     queryKey: ['auth', 'me'],
@@ -170,6 +175,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await clearStoredTokens();
     setAccessToken(null);
     queryClient.removeQueries({ queryKey: ['auth', 'me'] });
+    router.dismissAll();
+    router.replace('/(auth)/login');
   }, [queryClient]);
 
   const updateAvatar = useCallback(

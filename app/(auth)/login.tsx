@@ -1,29 +1,20 @@
-import { isAxiosError } from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, router } from 'expo-router';
-import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 
+import { AnimatedReveal } from '@/components/AnimatedReveal';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
+import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useAuth } from '@/hooks/useAuth';
 import { loginSchema, type LoginFormValues } from '@/schemas/auth';
-
-function apiErrorMessage(err: unknown): string {
-  if (isAxiosError(err)) {
-    const data = err.response?.data as { detail?: unknown } | undefined;
-    if (data && typeof data.detail === 'string') {
-      return data.detail;
-    }
-    return 'Credenciais inválidas ou servidor indisponível.';
-  }
-  return 'Ocorreu um erro inesperado.';
-}
+import { extractApiErrorMessage } from '@/utils/apiError';
+import { showErrorToast } from '@/utils/feedback';
 
 export default function LoginScreen() {
   const { login, loginPending } = useAuth();
-  const [formError, setFormError] = useState<string | null>(null);
+  const { monochrome } = useInterfaceMode();
 
   const {
     control,
@@ -37,15 +28,16 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      className="flex-1 bg-slate-50 dark:bg-slate-950">
+      className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-slate-950'}`}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
-        contentContainerClassName="flex-grow justify-center px-5 py-8"
+        contentContainerClassName="flex-grow justify-center px-6 py-10"
         contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="w-full max-w-md self-center">
-          <Text className="mb-1 text-2xl font-bold text-slate-900 dark:text-slate-50">Bibliotec</Text>
-          <Text className="mb-8 text-base text-slate-600 dark:text-slate-300">
-            Entre com o seu e-mail e palavra-passe.
+        <AnimatedReveal className={`w-full max-w-md self-center rounded-[32px] border px-6 py-8 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900'}`}>
+          <Text className={`text-sm font-bold uppercase tracking-[2px] ${monochrome ? 'text-neutral-500' : 'text-orange-700 dark:text-orange-400'}`}>Bibliotec</Text>
+          <Text className={`mt-3 text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Entre no seu acervo</Text>
+          <Text className={`mb-8 mt-3 text-base leading-6 ${monochrome ? 'text-neutral-700' : 'text-stone-600 dark:text-stone-300'}`}>
+            Continue organizando livros, propostas e conexões da comunidade.
           </Text>
 
           <Controller
@@ -61,10 +53,7 @@ export default function LoginScreen() {
                 textContentType="emailAddress"
                 value={value}
                 onBlur={onBlur}
-                onChangeText={(t) => {
-                  setFormError(null);
-                  onChange(t);
-                }}
+                onChangeText={onChange}
                 error={errors.email?.message}
               />
             )}
@@ -82,39 +71,34 @@ export default function LoginScreen() {
                 textContentType="password"
                 value={value}
                 onBlur={onBlur}
-                onChangeText={(t) => {
-                  setFormError(null);
-                  onChange(t);
-                }}
+                onChangeText={onChange}
                 error={errors.password?.message}
               />
             )}
           />
 
-          {formError ? (
-            <Text className="mb-4 text-sm text-red-600 dark:text-red-400">{formError}</Text>
-          ) : null}
-
-          <Button
-            loading={loginPending}
-            onPress={handleSubmit(async (v) => {
-              setFormError(null);
-              try {
-                await login(v.email, v.password);
-                router.replace('/(app)/(tabs)');
-              } catch (e) {
-                setFormError(apiErrorMessage(e));
-              }
-            })}>
-            Entrar
-          </Button>
+          <View className="mt-2">
+            <Button
+              loading={loginPending}
+              onPress={handleSubmit(async (v) => {
+                try {
+                  await login(v.email, v.password);
+                  router.dismissAll();
+                  router.replace('/(app)/(tabs)');
+                } catch (e) {
+                  showErrorToast('Não foi possível entrar', extractApiErrorMessage(e, 'E-mail ou palavra-passe inválidos.'));
+                }
+              })}>
+              Entrar
+            </Button>
+          </View>
 
           <Link
             href="/(auth)/register"
-            className="mt-6 self-center text-base text-slate-700 underline dark:text-slate-200">
+            className={`mt-8 self-center text-base font-medium underline ${monochrome ? 'text-black' : 'text-stone-700 dark:text-stone-300'}`}>
             Criar conta
           </Link>
-        </View>
+        </AnimatedReveal>
       </ScrollView>
     </KeyboardAvoidingView>
   );

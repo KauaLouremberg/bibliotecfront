@@ -2,10 +2,13 @@ import { router } from 'expo-router';
 import { FlatList, RefreshControl, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import * as Linking from 'expo-linking';
 
+import { AnimatedReveal } from '@/components/AnimatedReveal';
 import { Button } from '@/components/Button';
 import { Pill } from '@/components/Pill';
 import { postIntentLabels, postIntentTones, sharingStatusLabels } from '@/constants/library';
+import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useCommunityFeed } from '@/hooks/useLibrary';
+import { useToastOnQueryError } from '@/hooks/useToastOnQueryError';
 
 function formatDateLabel(value: string) {
   return new Intl.DateTimeFormat('pt-BR', {
@@ -16,16 +19,18 @@ function formatDateLabel(value: string) {
 
 export default function CommunityFeedScreen() {
   const feedQuery = useCommunityFeed();
+  const { monochrome } = useInterfaceMode();
+  useToastOnQueryError(feedQuery, 'Feed indisponível', 'Não foi possível carregar os sinais da comunidade.');
   const { height } = useWindowDimensions();
   const feed = feedQuery.data;
   const cardHeight = Math.max(520, height - 250);
 
   return (
-    <View className="flex-1 bg-stone-950">
-      <View className="px-5 pb-4 pt-4">
-        <Text className="text-sm uppercase tracking-[1.5px] text-orange-300">Conexões</Text>
-        <Text className="mt-2 text-3xl font-bold text-white">Sinais em destaque</Text>
-        <Text className="mt-2 text-sm leading-6 text-stone-300">
+    <View className={`flex-1 ${monochrome ? 'bg-black' : 'bg-stone-950'}`}>
+      <AnimatedReveal className="px-5 pb-4 pt-6">
+        <Text className={`text-sm uppercase tracking-[1.5px] ${monochrome ? 'text-neutral-400' : 'text-orange-400'}`}>Conexões</Text>
+        <Text className="mt-2 text-3xl font-black leading-tight text-white">Sinais em destaque</Text>
+        <Text className="mt-2 text-sm leading-6 text-stone-400">
           Deslize como um feed vertical para ver quem precisa de um livro, quem está doando e quem topa emprestar.
         </Text>
 
@@ -35,11 +40,11 @@ export default function CommunityFeedScreen() {
           <Pill label={`${feed?.stats.exchange_posts ?? 0} trocas`} tone="accent" />
           <Pill label={`${feed?.stats.loan_posts ?? 0} empréstimos`} tone="danger" />
         </View>
-      </View>
+      </AnimatedReveal>
 
       {feedQuery.isPending ? (
         <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-center text-base text-stone-300">Carregando sinais da comunidade...</Text>
+          <Text className="text-center text-base text-stone-400">Carregando sinais da comunidade...</Text>
         </View>
       ) : feed?.items.length ? (
         <FlatList
@@ -52,7 +57,7 @@ export default function CommunityFeedScreen() {
           refreshControl={
             <RefreshControl
               refreshing={feedQuery.isRefetching}
-              tintColor="#fdba74"
+              tintColor="#fb923c"
               onRefresh={() => {
                 void feedQuery.refetch();
               }}
@@ -62,30 +67,33 @@ export default function CommunityFeedScreen() {
           renderItem={({ item }) => (
             <View
               style={{ minHeight: cardHeight }}
-              className="mb-5 rounded-[36px] border border-white/10 bg-[#1c1917] px-5 py-6">
+              className={`mb-5 rounded-[32px] border px-6 py-7 ${monochrome ? 'border-white/20 bg-neutral-900' : 'border-stone-800 bg-stone-900'}`}>
+              {!monochrome ? (
+                <View className="absolute -right-12 top-24 h-32 w-32 rounded-full bg-orange-500/10" />
+              ) : null}
               <View className="flex-row items-center justify-between">
                 <Pill label={postIntentLabels[item.intent]} tone={postIntentTones[item.intent]} />
                 <Text className="text-sm font-medium text-stone-400">{formatDateLabel(item.created_at)}</Text>
               </View>
 
               <View className="mt-8">
-                <Text className="text-4xl font-bold leading-tight text-white">{item.book_title}</Text>
-                <Text className="mt-3 text-lg text-stone-300">{item.book_author}</Text>
+                <Text className="text-3xl font-bold leading-tight text-white">{item.book_title}</Text>
+                <Text className="mt-3 text-lg text-stone-400">{item.book_author}</Text>
               </View>
 
-              <View className="mt-8 rounded-[28px] bg-white/5 px-4 py-4">
-                <Text className="text-sm uppercase tracking-[1px] text-stone-400">Publicado por</Text>
-                <Text className="mt-2 text-2xl font-semibold text-white">
+              <View className="mt-8 rounded-[24px] bg-white/5 px-5 py-5">
+                <Text className="text-xs uppercase tracking-[1px] text-stone-400">Publicado por</Text>
+                <Text className="mt-2 text-xl font-semibold text-white">
                   {item.owner.full_name || item.owner.email}
                 </Text>
-                <Text className="mt-1 text-base text-stone-300">{item.owner.email}</Text>
+                <Text className="mt-1 text-base text-stone-400">{item.owner.email}</Text>
                 {item.location_label ? (
-                  <Text className="mt-3 text-sm text-stone-300">Local de referência: {item.location_label}</Text>
+                  <Text className="mt-3 text-sm text-stone-400">Local de referência: {item.location_label}</Text>
                 ) : null}
               </View>
 
               {item.caption ? (
-                <Text className="mt-8 text-base leading-7 text-stone-200">{item.caption}</Text>
+                <Text className="mt-8 text-base leading-7 text-stone-300">{item.caption}</Text>
               ) : (
                 <Text className="mt-8 text-base leading-7 text-stone-400">
                   Sem observações extras. O foco aqui é conectar rápido.
@@ -130,7 +138,7 @@ export default function CommunityFeedScreen() {
                       onPress={() => {
                         router.push('/(app)/signal-form');
                       }}>
-                      <Text className="text-center text-sm font-semibold text-orange-300">
+                      <Text className="text-center text-sm font-semibold text-orange-400">
                         Quero publicar um sinal parecido
                       </Text>
                     </TouchableOpacity>
@@ -142,19 +150,19 @@ export default function CommunityFeedScreen() {
         />
       ) : (
         <View className="flex-1 px-5">
-          <View className="rounded-[32px] bg-white/5 px-5 py-6">
+          <AnimatedReveal className="rounded-[28px] bg-white/5 px-6 py-7">
             <Text className="text-2xl font-bold text-white">Nenhum sinal publicado ainda.</Text>
-            <Text className="mt-3 text-sm leading-6 text-stone-300">
+            <Text className="mt-3 text-sm leading-6 text-stone-400">
               Publique pedidos, doações e ofertas para começar o fluxo de contatos entre usuários.
             </Text>
             <Button
-              className="mt-5"
+              className="mt-6"
               onPress={() => {
                 router.push('/(app)/signal-form');
               }}>
               Criar primeiro sinal
             </Button>
-          </View>
+          </AnimatedReveal>
         </View>
       )}
     </View>

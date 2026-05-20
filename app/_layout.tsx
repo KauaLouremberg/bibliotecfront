@@ -6,11 +6,13 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import ToastManager from 'toastify-react-native';
 
 import '../global.css';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { InterfaceProvider, useInterfaceMode } from '@/contexts/InterfaceContext';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -51,18 +53,44 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <RootLayoutNav />
-      </AuthProvider>
+      <InterfaceProvider>
+        <AuthProvider>
+          <RootLayoutNav />
+          <ToastManager
+            duration={4000}
+            position="top"
+            showCloseIcon
+            showProgressBar={false}
+            useModal={false}
+          />
+        </AuthProvider>
+      </InterfaceProvider>
     </QueryClientProvider>
   );
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const { monochrome } = useInterfaceMode();
+  const navigationTheme = monochrome
+    ? {
+        ...(colorScheme === 'dark' ? DarkTheme : DefaultTheme),
+        colors: {
+          ...(colorScheme === 'dark' ? DarkTheme.colors : DefaultTheme.colors),
+          primary: colorScheme === 'dark' ? '#ffffff' : '#000000',
+          background: colorScheme === 'dark' ? '#000000' : '#ffffff',
+          card: colorScheme === 'dark' ? '#090909' : '#ffffff',
+          text: colorScheme === 'dark' ? '#ffffff' : '#000000',
+          border: colorScheme === 'dark' ? '#404040' : '#d4d4d4',
+          notification: colorScheme === 'dark' ? '#ffffff' : '#000000',
+        },
+      }
+    : colorScheme === 'dark'
+      ? DarkTheme
+      : DefaultTheme;
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={navigationTheme}>
       <Stack>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />

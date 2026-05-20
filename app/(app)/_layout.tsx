@@ -1,6 +1,14 @@
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
+
+import { useAuth } from '@/hooks/useAuth';
 
 export default function AppGroupLayout() {
+  const { isReady, isAuthenticated } = useAuth();
+
+  if (isReady && !isAuthenticated) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
@@ -8,24 +16,21 @@ export default function AppGroupLayout() {
         name="book-form"
         options={{
           presentation: 'modal',
-          title: 'Livro do inventário',
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
         name="signal-form"
         options={{
           presentation: 'modal',
-          title: 'Novo sinal',
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
         name="trade-form"
         options={{
           presentation: 'modal',
-          title: 'Propor troca',
-          headerShown: true,
+          headerShown: false,
         }}
       />
     </Stack>
