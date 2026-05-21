@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 
@@ -128,8 +128,6 @@ export default function RegisterScreen() {
                     full_name: v.full_name.trim(),
                   });
                   showSuccessToast('Conta criada', 'Seu acesso foi liberado.');
-                  router.dismissAll();
-                  router.replace('/(app)/(tabs)');
                 } catch (e) {
                   showErrorToast('Não foi possível criar a conta', extractApiErrorMessage(e, 'Revise os dados e tente novamente.'));
                 }

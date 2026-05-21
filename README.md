@@ -33,8 +33,8 @@ npm run start
 
 Ou `npx expo start`. Depois escolha **Android**, **iOS** ou **web** no terminal ou na interface do Expo.
 
-- Em **dispositivo físico Android**, use o IP da máquina em `EXPO_PUBLIC_API_URL` em vez de `127.0.0.1`, para o telemóvel alcançar o Django na rede local.
-- Confirme **CORS** no backend para a origem do Metro (por exemplo `http://localhost:8081` em desenvolvimento web).
+- Em **dispositivo físico**, o app substitui automaticamente `127.0.0.1` pelo IP da máquina (o mesmo que o Metro mostra no QR). Pode forçar com `EXPO_PUBLIC_API_URL=http://SEU_IP:8000` no `.env`.
+- O Django deve correr na rede: `python manage.py runserver 0.0.0.0:8000` (PC e telemóvel na mesma Wi‑Fi).
 
 ## Scripts
 

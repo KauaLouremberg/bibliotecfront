@@ -1,24 +1,21 @@
-import { Stack } from 'expo-router';
-import { useEffect } from 'react';
+import { Redirect, Stack } from 'expo-router';
 import { ActivityIndicator, View } from 'react-native';
 
 import { useAuth } from '@/hooks/useAuth';
 
 export default function AuthGroupLayout() {
-  const { isReady, isAuthenticated, logout } = useAuth();
+  const { isReady, isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    if (isReady && isAuthenticated) {
-      void logout();
-    }
-  }, [isAuthenticated, isReady, logout]);
-
-  if (isReady && isAuthenticated) {
+  if (!isReady) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
         <ActivityIndicator size="large" />
       </View>
     );
+  }
+
+  if (isAuthenticated) {
+    return <Redirect href="/(app)/(tabs)" />;
   }
 
   return (
