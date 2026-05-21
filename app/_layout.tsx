@@ -85,9 +85,18 @@ function RootLayoutNav() {
           notification: colorScheme === 'dark' ? '#ffffff' : '#000000',
         },
       }
-    : colorScheme === 'dark'
-      ? DarkTheme
-      : DefaultTheme;
+    : {
+        ...(colorScheme === 'dark' ? DarkTheme : DefaultTheme),
+        colors: {
+          ...(colorScheme === 'dark' ? DarkTheme.colors : DefaultTheme.colors),
+          primary: '#8B6534',
+          background: colorScheme === 'dark' ? '#4A3520' : '#F5ECD7',
+          card: colorScheme === 'dark' ? '#4A3520' : '#F5ECD7',
+          text: colorScheme === 'dark' ? '#F5ECD7' : '#4A3520',
+          border: '#C9A96E',
+          notification: '#8B6534',
+        },
+      };
 
   return (
     <ThemeProvider value={navigationTheme}>

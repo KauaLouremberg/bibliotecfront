@@ -18,6 +18,11 @@ export type InventoryBook = {
   title: string;
   author: string;
   description: string;
+  genre: string;
+  published_year: number | null;
+  publisher: string;
+  isbn: string;
+  page_count: number | null;
   cover_url: string;
   has_physical_copy: boolean;
   sharing_status: SharingStatus;
@@ -25,6 +30,9 @@ export type InventoryBook = {
   owner: OwnerSummary;
   is_owner: boolean;
   matches_waiting: number;
+  average_rating: number;
+  rating_count: number;
+  my_rating: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -39,6 +47,24 @@ export type InventoryStats = {
 export type InventoryCollection = {
   items: InventoryBook[];
   stats: InventoryStats;
+};
+
+export type CatalogBook = {
+  id: string;
+  title: string;
+  author: string;
+  description: string;
+  genre: string;
+  cover_url: string;
+  published_year: number | null;
+  publisher: string;
+  isbn: string;
+  page_count: number | null;
+};
+
+export type CatalogCollection = {
+  items: CatalogBook[];
+  genres: string[];
 };
 
 export type InventoryBookPreview = {
@@ -97,6 +123,12 @@ export type InventoryBookPayload = {
   title: string;
   author: string;
   description: string;
+  genre: string;
+  published_year: string;
+  publisher: string;
+  isbn: string;
+  page_count: string;
+  cover_url: string;
   has_physical_copy: boolean;
   sharing_status: SharingStatus;
   location_label: string;
@@ -148,14 +180,37 @@ export function useMyInventory() {
   });
 }
 
-export function useDiscoverInventory(filters?: { search?: string; trade_status?: DiscoverTradeStatus | null }) {
+export function useCatalogBooks(filters?: { search?: string; genre?: string }) {
   return useQuery({
-    queryKey: [...libraryQueryKey, 'inventory', 'discover', filters?.search ?? '', filters?.trade_status ?? 'all'],
+    queryKey: [...libraryQueryKey, 'catalog', filters?.search ?? '', filters?.genre ?? ''],
+    queryFn: async () => {
+      const { data } = await api.get<CatalogCollection>('/api/library/catalog', {
+        params: {
+          search: filters?.search ?? '',
+          genre: filters?.genre ?? '',
+        },
+      });
+      return data;
+    },
+  });
+}
+
+export function useDiscoverInventory(filters?: { search?: string; trade_status?: DiscoverTradeStatus | null; genre?: string }) {
+  return useQuery({
+    queryKey: [
+      ...libraryQueryKey,
+      'inventory',
+      'discover',
+      filters?.search ?? '',
+      filters?.trade_status ?? 'all',
+      filters?.genre ?? '',
+    ],
     queryFn: async () => {
       const { data } = await api.get<InventoryCollection>('/api/library/inventory/discover', {
         params: {
           search: filters?.search ?? '',
           trade_status: filters?.trade_status ?? undefined,
+          genre: filters?.genre ?? '',
         },
       });
       return data;
@@ -173,6 +228,12 @@ export function useUpsertInventoryBook() {
       appendIfPresent(formData, 'title', body.title);
       appendIfPresent(formData, 'author', body.author);
       appendIfPresent(formData, 'description', body.description);
+      appendIfPresent(formData, 'genre', body.genre);
+      appendIfPresent(formData, 'published_year', body.published_year);
+      appendIfPresent(formData, 'publisher', body.publisher);
+      appendIfPresent(formData, 'isbn', body.isbn);
+      appendIfPresent(formData, 'page_count', body.page_count);
+      appendIfPresent(formData, 'cover_url', body.cover_url);
       appendIfPresent(formData, 'location_label', body.location_label);
       appendIfPresent(formData, 'has_physical_copy', body.has_physical_copy);
       appendIfPresent(formData, 'sharing_status', body.sharing_status);
@@ -191,6 +252,22 @@ export function useUpsertInventoryBook() {
         return data;
       }
       const { data } = await api.post<InventoryBook>('/api/library/inventory', formData);
+      return data;
+    },
+    onSuccess: async () => {
+      await invalidateLibrary(queryClient);
+    },
+  });
+}
+
+export function useRateInventoryBook() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: { bookId: number; rating: number }) => {
+      const { data } = await api.put<InventoryBook>(`/api/library/inventory/${payload.bookId}/rating`, {
+        rating: payload.rating,
+      });
       return data;
     },
     onSuccess: async () => {

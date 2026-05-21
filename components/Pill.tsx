@@ -8,8 +8,8 @@ type PillProps = {
 };
 
 const toneMap: Record<NonNullable<PillProps['tone']>, { bg: string; text: string; darkBg: string; darkText: string }> = {
-  neutral: { bg: 'bg-stone-200', text: 'text-stone-700', darkBg: 'dark:bg-stone-700', darkText: 'dark:text-stone-200' },
-  accent: { bg: 'bg-orange-100', text: 'text-orange-800', darkBg: 'dark:bg-orange-900/40', darkText: 'dark:text-orange-200' },
+  neutral: { bg: 'bg-[#F5ECD7]', text: 'text-[#4A3520]', darkBg: '', darkText: '' },
+  accent: { bg: 'bg-[#C9A96E]/35', text: 'text-[#4A3520]', darkBg: '', darkText: '' },
   success: { bg: 'bg-emerald-100', text: 'text-emerald-800', darkBg: 'dark:bg-emerald-900/40', darkText: 'dark:text-emerald-200' },
   warning: { bg: 'bg-amber-100', text: 'text-amber-800', darkBg: 'dark:bg-amber-900/40', darkText: 'dark:text-amber-200' },
   danger: { bg: 'bg-rose-100', text: 'text-rose-800', darkBg: 'dark:bg-rose-900/40', darkText: 'dark:text-rose-200' },

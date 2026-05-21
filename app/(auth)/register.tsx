@@ -33,15 +33,15 @@ export default function RegisterScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-slate-950'}`}>
+      className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7]'}`}>
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="flex-grow justify-center px-6 py-10"
         contentContainerStyle={{ flexGrow: 1 }}>
-        <AnimatedReveal className={`w-full max-w-md self-center rounded-[32px] border px-6 py-8 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900'}`}>
-          <Text className={`text-sm font-bold uppercase tracking-[2px] ${monochrome ? 'text-neutral-500' : 'text-orange-700 dark:text-orange-400'}`}>Novo acesso</Text>
-          <Text className={`mt-3 text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Crie sua biblioteca</Text>
-          <Text className={`mb-8 mt-3 text-base leading-6 ${monochrome ? 'text-neutral-700' : 'text-stone-600 dark:text-stone-300'}`}>
+        <AnimatedReveal className={`w-full max-w-md self-center rounded-[32px] border px-6 py-8 ${monochrome ? 'border-neutral-300 bg-white' : 'border-[#C9A96E]/45 bg-[#E8D5B0]'}`}>
+          <Text className={`text-sm font-bold uppercase tracking-[2px] ${monochrome ? 'text-neutral-500' : 'text-[#8B6534]'}`}>Novo acesso</Text>
+          <Text className={`mt-3 text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>Crie sua biblioteca</Text>
+          <Text className={`mb-8 mt-3 text-base leading-6 ${monochrome ? 'text-neutral-700' : 'text-[#4A3520]/75'}`}>
             Cadastre seus dados e comece a trocar livros com a comunidade.
           </Text>
 
@@ -138,7 +138,7 @@ export default function RegisterScreen() {
 
           <Link
             href="/(auth)/login"
-            className={`mt-8 self-center text-base font-medium underline ${monochrome ? 'text-black' : 'text-stone-700 dark:text-stone-300'}`}>
+            className={`mt-8 self-center text-base font-medium underline ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>
             Já tenho conta
           </Link>
         </AnimatedReveal>

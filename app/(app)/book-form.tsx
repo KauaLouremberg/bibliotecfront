@@ -24,6 +24,12 @@ const emptyValues: InventoryBookFormValues = {
   title: '',
   author: '',
   description: '',
+  genre: '',
+  published_year: '',
+  publisher: '',
+  isbn: '',
+  page_count: '',
+  cover_url: '',
   location_label: '',
   has_physical_copy: false,
   sharing_status: 'private',
@@ -33,7 +39,18 @@ const maxCoverSize = 5 * 1024 * 1024;
 
 export default function BookFormScreen() {
   const { monochrome } = useInterfaceMode();
-  const params = useLocalSearchParams<{ bookId?: string | string[] }>();
+  const params = useLocalSearchParams<{
+    bookId?: string | string[];
+    title?: string | string[];
+    author?: string | string[];
+    description?: string | string[];
+    genre?: string | string[];
+    publishedYear?: string | string[];
+    publisher?: string | string[];
+    isbn?: string | string[];
+    pageCount?: string | string[];
+    coverUrl?: string | string[];
+  }>();
   const bookId = Number(firstParam(params.bookId) ?? 0) || undefined;
   const inventoryQuery = useMyInventory();
   const { data, isPending } = inventoryQuery;
@@ -53,6 +70,8 @@ export default function BookFormScreen() {
     control,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<InventoryBookFormValues>({
     resolver: zodResolver(inventoryBookSchema),
@@ -65,6 +84,12 @@ export default function BookFormScreen() {
         title: book.title,
         author: book.author,
         description: book.description,
+        genre: book.genre,
+        published_year: book.published_year ? String(book.published_year) : '',
+        publisher: book.publisher,
+        isbn: book.isbn,
+        page_count: book.page_count ? String(book.page_count) : '',
+        cover_url: book.cover_url,
         location_label: book.location_label,
         has_physical_copy: book.has_physical_copy,
         sharing_status: book.sharing_status,
@@ -74,10 +99,33 @@ export default function BookFormScreen() {
       return;
     }
 
-    reset(emptyValues);
+    reset({
+      ...emptyValues,
+      title: firstParam(params.title) ?? '',
+      author: firstParam(params.author) ?? '',
+      description: firstParam(params.description) ?? '',
+      genre: firstParam(params.genre) ?? '',
+      published_year: firstParam(params.publishedYear) ?? '',
+      publisher: firstParam(params.publisher) ?? '',
+      isbn: firstParam(params.isbn) ?? '',
+      page_count: firstParam(params.pageCount) ?? '',
+      cover_url: firstParam(params.coverUrl) ?? '',
+    });
     setSelectedCover(null);
     setRemoveCover(false);
-  }, [book, reset]);
+  }, [
+    book,
+    params.author,
+    params.coverUrl,
+    params.description,
+    params.genre,
+    params.isbn,
+    params.pageCount,
+    params.publishedYear,
+    params.publisher,
+    params.title,
+    reset,
+  ]);
 
   async function selectCover() {
     if (actionPending) return;
@@ -109,23 +157,25 @@ export default function BookFormScreen() {
       name: asset.fileName ?? `cover-${Date.now()}.jpg`,
       type: asset.mimeType ?? 'image/jpeg',
     });
+    setValue('cover_url', '');
     setRemoveCover(false);
   }
 
-  const previewUri = removeCover ? '' : selectedCover?.uri ?? book?.cover_url ?? '';
+  const remoteCoverUrl = watch('cover_url');
+  const previewUri = removeCover ? '' : selectedCover?.uri ?? book?.cover_url ?? remoteCoverUrl ?? '';
 
   if (bookId && isPending) {
     return (
-      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-stone-950'}`}>
-        <Text className={`text-base ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>Carregando livro...</Text>
+      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7]'}`}>
+        <Text className={`text-base ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]'}`}>Carregando livro...</Text>
       </View>
     );
   }
 
   if (bookId && !book) {
     return (
-      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-stone-950'}`}>
-        <Text className={`text-center text-base ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
+      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7]'}`}>
+        <Text className={`text-center text-base ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]'}`}>
           Livro não encontrado no seu inventário. Atualize a lista e tente novamente.
         </Text>
         <Button className="mt-5 max-w-[200px]" onPress={() => router.back()}>
@@ -136,21 +186,21 @@ export default function BookFormScreen() {
   }
 
   return (
-    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-stone-950'}`} keyboardShouldPersistTaps="handled">
+    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7]'}`} keyboardShouldPersistTaps="handled">
       <View className="px-5 pb-12 pt-6">
-        <TouchableOpacity className={`mb-6 self-start rounded-full border px-4 py-2 ${monochrome ? 'border-neutral-300' : 'border-stone-300 dark:border-stone-600'}`} onPress={() => router.back()}>
-          <Text className={`text-sm font-bold ${monochrome ? 'text-black' : 'text-stone-800 dark:text-stone-200'}`}>Fechar</Text>
+        <TouchableOpacity className={`mb-6 self-start rounded-full border px-4 py-2 ${monochrome ? 'border-neutral-300' : 'border-[#C9A96E]'}`} onPress={() => router.back()}>
+          <Text className={`text-sm font-bold ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>Fechar</Text>
         </TouchableOpacity>
         <AnimatedReveal>
-          <Text className={`text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>
+          <Text className={`text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>
             {book ? 'Editar livro do inventário' : 'Adicionar livro ao inventário'}
           </Text>
-          <Text className={`mt-2 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
+          <Text className={`mt-2 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]/75'}`}>
             Todo item nasce como ebook. Se você também tiver a cópia física, marque isso abaixo para exibição aos outros usuários.
           </Text>
         </AnimatedReveal>
 
-        <AnimatedReveal delay={100} className={`mt-6 rounded-[24px] border px-5 py-6 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900'}`}>
+        <AnimatedReveal delay={100} className={`mt-6 rounded-[24px] border px-5 py-6 ${monochrome ? 'border-neutral-300 bg-white' : 'border-[#C9A96E]/45 bg-[#E8D5B0]'}`}>
           <Controller
             control={control}
             name="title"
@@ -183,6 +233,89 @@ export default function BookFormScreen() {
 
           <Controller
             control={control}
+            name="genre"
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <TextField
+                ref={ref}
+                label="Gênero"
+                placeholder="Ex.: Romance, Fantasia, História"
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                error={errors.genre?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
+            name="publisher"
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <TextField
+                ref={ref}
+                label="Editora"
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                error={errors.publisher?.message}
+              />
+            )}
+          />
+
+          <View className="flex-row gap-3">
+            <View className="flex-1">
+              <Controller
+                control={control}
+                name="published_year"
+                render={({ field: { onChange, onBlur, value, ref } }) => (
+                  <TextField
+                    ref={ref}
+                    label="Ano"
+                    keyboardType="number-pad"
+                    value={value}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    error={errors.published_year?.message}
+                  />
+                )}
+              />
+            </View>
+            <View className="flex-1">
+              <Controller
+                control={control}
+                name="page_count"
+                render={({ field: { onChange, onBlur, value, ref } }) => (
+                  <TextField
+                    ref={ref}
+                    label="Páginas"
+                    keyboardType="number-pad"
+                    value={value}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    error={errors.page_count?.message}
+                  />
+                )}
+              />
+            </View>
+          </View>
+
+          <Controller
+            control={control}
+            name="isbn"
+            render={({ field: { onChange, onBlur, value, ref } }) => (
+              <TextField
+                ref={ref}
+                label="ISBN"
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                error={errors.isbn?.message}
+              />
+            )}
+          />
+
+          <Controller
+            control={control}
             name="location_label"
             render={({ field: { onChange, onBlur, value, ref } }) => (
               <TextField
@@ -198,12 +331,12 @@ export default function BookFormScreen() {
           />
 
           <View className="mb-6">
-            <Text className={`mb-3 text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-stone-800 dark:text-stone-300'}`}>Capa do livro</Text>
+            <Text className={`mb-3 text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-[#4A3520]'}`}>Capa do livro</Text>
             {previewUri ? (
-              <Image source={{ uri: previewUri }} className="mb-3 h-56 w-40 rounded-3xl bg-stone-100 dark:bg-stone-700" resizeMode="cover" />
+              <Image source={{ uri: previewUri }} className="mb-3 h-56 w-40 rounded-3xl bg-[#C9A96E]/30" resizeMode="cover" />
             ) : (
-              <View className={`mb-3 h-56 w-40 items-center justify-center rounded-3xl ${monochrome ? 'bg-neutral-200' : 'bg-orange-100 dark:bg-orange-900/30'}`}>
-                <Text className={`text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-orange-700 dark:text-orange-300'}`}>Sem capa</Text>
+              <View className={`mb-3 h-56 w-40 items-center justify-center rounded-3xl ${monochrome ? 'bg-neutral-200' : 'bg-[#F5ECD7]'}`}>
+                <Text className={`text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-[#4A3520]'}`}>Sem capa</Text>
               </View>
             )}
             <View className="gap-3">
@@ -217,6 +350,7 @@ export default function BookFormScreen() {
                   onPress={() => {
                     setSelectedCover(null);
                     setRemoveCover(true);
+                    setValue('cover_url', '');
                   }}>
                   Remover capa
                 </Button>
@@ -230,7 +364,7 @@ export default function BookFormScreen() {
             render={({ field: { onChange, onBlur, value, ref } }) => (
               <TextField
                 ref={ref}
-                label="Observações"
+                label="Sinopse/descrição"
                 multiline
                 numberOfLines={4}
                 textAlignVertical="top"
@@ -247,14 +381,14 @@ export default function BookFormScreen() {
             control={control}
             name="has_physical_copy"
             render={({ field: { onChange, value } }) => (
-              <View className={`mb-6 flex-row items-center justify-between rounded-2xl px-4 py-4 ${monochrome ? 'bg-neutral-100' : 'bg-stone-50 dark:bg-stone-800'}`}>
+              <View className={`mb-6 flex-row items-center justify-between rounded-2xl px-4 py-4 ${monochrome ? 'bg-neutral-100' : 'bg-[#F5ECD7]'}`}>
                 <View className="mr-4 flex-1">
-                  <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Também possuo a cópia física</Text>
-                  <Text className={`mt-1 text-sm ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
+                  <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>Também possuo a cópia física</Text>
+                  <Text className={`mt-1 text-sm ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]/75'}`}>
                     Outros usuários verão que você tem o ebook e o exemplar físico.
                   </Text>
                 </View>
-                <Switch value={value} onValueChange={onChange} trackColor={{ true: '#fb923c' }} />
+                <Switch value={value} onValueChange={onChange} trackColor={{ true: '#8B6534' }} />
               </View>
             )}
           />
@@ -264,7 +398,7 @@ export default function BookFormScreen() {
             name="sharing_status"
             render={({ field: { value, onChange } }) => (
               <View>
-                <Text className={`mb-3 text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-stone-800 dark:text-stone-300'}`}>Disponibilidade</Text>
+                <Text className={`mb-3 text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-[#4A3520]'}`}>Disponibilidade</Text>
                 <View className="gap-3">
                   {sharingStatusOptions.map((option) => {
                     const selected = value === option.value;
@@ -273,13 +407,13 @@ export default function BookFormScreen() {
                         key={option.value}
                         className={`rounded-2xl border px-4 py-4 ${
                           selected
-                            ? monochrome ? 'border-black bg-neutral-100' : 'border-orange-500 bg-orange-50 dark:border-orange-500 dark:bg-orange-900/20'
-                            : monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-600 dark:bg-stone-800'
+                            ? monochrome ? 'border-black bg-neutral-100' : 'border-[#8B6534] bg-[#F5ECD7]'
+                            : monochrome ? 'border-neutral-300 bg-white' : 'border-[#C9A96E]/70 bg-[#E8D5B0]'
                         }`}
                         disabled={actionPending}
                         onPress={() => onChange(option.value)}>
-                        <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>{option.label}</Text>
-                        <Text className={`mt-1 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>{option.description}</Text>
+                        <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>{option.label}</Text>
+                        <Text className={`mt-1 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]/75'}`}>{option.description}</Text>
                       </TouchableOpacity>
                     );
                   })}
@@ -344,7 +478,7 @@ export default function BookFormScreen() {
                   },
                 });
               }}>
-              <Text className={`text-center text-sm font-semibold ${monochrome ? 'text-black' : 'text-orange-700 dark:text-orange-400'}`}>
+              <Text className={`text-center text-sm font-semibold ${monochrome ? 'text-black' : 'text-[#8B6534]'}`}>
                 Criar um sinal público usando {sharingStatusLabels[book.sharing_status].toLowerCase()}
               </Text>
             </TouchableOpacity>

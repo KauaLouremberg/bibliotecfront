@@ -102,7 +102,7 @@ export default function SignalFormScreen() {
 
   if ((postId && feedPending) || inventoryPending) {
     return (
-      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-stone-950'}`}>
+      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#4A3520]'}`}>
         <Text className="text-base text-stone-400">Carregando formulário...</Text>
       </View>
     );
@@ -110,7 +110,7 @@ export default function SignalFormScreen() {
 
   if (postId && !post) {
     return (
-      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-stone-950'}`}>
+      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#4A3520]'}`}>
         <Text className="text-center text-base text-stone-400">
           Sinal não encontrado. Ele pode ter sido removido ou não pertence mais ao seu usuário.
         </Text>
@@ -122,7 +122,7 @@ export default function SignalFormScreen() {
   }
 
   return (
-    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-stone-950'}`} keyboardShouldPersistTaps="handled">
+    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#4A3520]'}`} keyboardShouldPersistTaps="handled">
       <View className="px-5 pb-12 pt-6">
         <TouchableOpacity className={`mb-6 self-start rounded-full border px-4 py-2 ${monochrome ? 'border-neutral-300' : 'border-white/20'}`} onPress={() => router.back()}>
           <Text className={`text-sm font-bold ${monochrome ? 'text-black' : 'text-white'}`}>Fechar</Text>
@@ -136,7 +136,7 @@ export default function SignalFormScreen() {
           </Text>
         </AnimatedReveal>
 
-        <AnimatedReveal delay={100} className={`mt-6 rounded-[24px] border px-5 py-6 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-700 bg-stone-900'}`}>
+        <AnimatedReveal delay={100} className={`mt-6 rounded-[24px] border px-5 py-6 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-700 bg-[#4A3520]'}`}>
           <Controller
             control={control}
             name="intent"
@@ -151,7 +151,7 @@ export default function SignalFormScreen() {
                         key={option.value}
                         className={`rounded-2xl border px-4 py-4 ${
                           selected
-                            ? monochrome ? 'border-black bg-neutral-100' : 'border-orange-500 bg-orange-900/20'
+                            ? monochrome ? 'border-black bg-neutral-100' : 'border-[#8B6534] bg-[#F5ECD7]'
                             : monochrome ? 'border-neutral-300 bg-white' : 'border-stone-600 bg-stone-800'
                         }`}
                         disabled={actionPending}
@@ -241,7 +241,7 @@ export default function SignalFormScreen() {
                   <TouchableOpacity
                     className={`mb-3 rounded-2xl border px-4 py-4 ${
                       value === null
-                        ? monochrome ? 'border-black bg-neutral-100' : 'border-orange-500 bg-orange-900/20'
+                        ? monochrome ? 'border-black bg-neutral-100' : 'border-[#8B6534] bg-[#F5ECD7]'
                         : monochrome ? 'border-neutral-300 bg-white' : 'border-stone-600 bg-stone-800'
                     }`}
                     disabled={actionPending}
@@ -260,7 +260,7 @@ export default function SignalFormScreen() {
                           key={bk.id}
                           className={`rounded-2xl border px-4 py-4 ${
                             selected
-                              ? monochrome ? 'border-black bg-neutral-100' : 'border-orange-500 bg-orange-900/20'
+                              ? monochrome ? 'border-black bg-neutral-100' : 'border-[#8B6534] bg-[#F5ECD7]'
                               : monochrome ? 'border-neutral-300 bg-white' : 'border-stone-600 bg-stone-800'
                           }`}
                           disabled={actionPending}

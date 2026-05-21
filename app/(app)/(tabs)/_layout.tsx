@@ -19,13 +19,13 @@ export default function TabLayout() {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark' && !monochrome;
 
-  const activeColor = monochrome ? '#000000' : isDark ? '#fb923c' : '#c2410c';
-  const inactiveColor = monochrome ? '#737373' : isDark ? '#78716c' : '#a8a29e';
-  const tabBarBg = monochrome ? '#ffffff' : isDark ? '#1c1917' : '#fffbeb';
-  const borderClr = monochrome ? '#d4d4d4' : isDark ? '#44403c' : '#fed7aa';
-  const headerBg = monochrome ? '#ffffff' : isDark ? '#0c0a09' : '#fffbeb';
-  const headerClr = monochrome ? '#111111' : isDark ? '#fafaf9' : '#1c1917';
-  const actionClr = monochrome ? '#111111' : isDark ? '#fb923c' : '#9a3412';
+  const activeColor = monochrome ? '#000000' : isDark ? '#C9A96E' : '#8B6534';
+  const inactiveColor = monochrome ? '#737373' : isDark ? '#C9A96E' : '#C9A96E';
+  const tabBarBg = monochrome ? '#ffffff' : isDark ? '#4A3520' : '#E8D5B0';
+  const borderClr = monochrome ? '#d4d4d4' : '#C9A96E';
+  const headerBg = monochrome ? '#ffffff' : isDark ? '#4A3520' : '#F5ECD7';
+  const headerClr = monochrome ? '#111111' : isDark ? '#F5ECD7' : '#4A3520';
+  const actionClr = monochrome ? '#111111' : '#8B6534';
 
   return (
     <Tabs

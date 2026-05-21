@@ -16,18 +16,18 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
 
   return (
     <View className="mb-5 w-full">
-      <Text className={`mb-2 text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-stone-800 dark:text-stone-300'}`}>
+      <Text className={`mb-2 text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-[#4A3520]'}`}>
         {label}
       </Text>
       <TextInput
         ref={ref}
-        placeholderTextColor={monochrome ? '#737373' : '#78716c'}
+        placeholderTextColor={monochrome ? '#737373' : '#8B6534'}
         className={`w-full rounded-2xl border px-4 py-3.5 text-base ${
           error
             ? 'border-red-500 bg-red-50 text-red-900 dark:bg-red-950/30 dark:text-red-200'
             : monochrome
               ? 'border-neutral-400 bg-white text-neutral-950'
-              : 'border-stone-200 bg-stone-50 text-stone-900 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100'
+              : 'border-[#C9A96E]/70 bg-[#F5ECD7] text-[#4A3520]'
         } ${className ?? ''}`}
         {...inputProps}
       />

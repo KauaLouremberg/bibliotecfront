@@ -26,9 +26,9 @@ export default function CommunityFeedScreen() {
   const cardHeight = Math.max(520, height - 250);
 
   return (
-    <View className={`flex-1 ${monochrome ? 'bg-black' : 'bg-stone-950'}`}>
+    <View className={`flex-1 ${monochrome ? 'bg-black' : 'bg-[#4A3520]'}`}>
       <AnimatedReveal className="px-5 pb-4 pt-6">
-        <Text className={`text-sm uppercase tracking-[1.5px] ${monochrome ? 'text-neutral-400' : 'text-orange-400'}`}>Conexões</Text>
+        <Text className={`text-sm uppercase tracking-[1.5px] ${monochrome ? 'text-neutral-400' : 'text-[#C9A96E]'}`}>Conexões</Text>
         <Text className="mt-2 text-3xl font-black leading-tight text-white">Sinais em destaque</Text>
         <Text className="mt-2 text-sm leading-6 text-stone-400">
           Deslize como um feed vertical para ver quem precisa de um livro, quem está doando e quem topa emprestar.
@@ -67,9 +67,9 @@ export default function CommunityFeedScreen() {
           renderItem={({ item }) => (
             <View
               style={{ minHeight: cardHeight }}
-              className={`mb-5 rounded-[32px] border px-6 py-7 ${monochrome ? 'border-white/20 bg-neutral-900' : 'border-stone-800 bg-stone-900'}`}>
+              className={`mb-5 rounded-[32px] border px-6 py-7 ${monochrome ? 'border-white/20 bg-neutral-900' : 'border-stone-800 bg-[#4A3520]'}`}>
               {!monochrome ? (
-                <View className="absolute -right-12 top-24 h-32 w-32 rounded-full bg-orange-500/10" />
+                <View className="absolute -right-12 top-24 h-32 w-32 rounded-full bg-[#F5ECD7]0/10" />
               ) : null}
               <View className="flex-row items-center justify-between">
                 <Pill label={postIntentLabels[item.intent]} tone={postIntentTones[item.intent]} />
@@ -138,7 +138,7 @@ export default function CommunityFeedScreen() {
                       onPress={() => {
                         router.push('/(app)/signal-form');
                       }}>
-                      <Text className="text-center text-sm font-semibold text-orange-400">
+                      <Text className="text-center text-sm font-semibold text-[#C9A96E]">
                         Quero publicar um sinal parecido
                       </Text>
                     </TouchableOpacity>

@@ -90,19 +90,19 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-stone-950'}`} keyboardShouldPersistTaps="handled">
+    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`} keyboardShouldPersistTaps="handled">
       <View className="px-5 pb-32 pt-6">
         <AnimatedReveal>
-          <Text className={`text-3xl font-black ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Perfil</Text>
+          <Text className={`text-3xl font-black ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Perfil</Text>
           <Text className={`mt-2 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
             Atualize seus dados públicos, informações acadêmicas e a palavra-passe da conta.
           </Text>
         </AnimatedReveal>
 
-        <AnimatedReveal delay={80} className={`mt-6 rounded-[24px] border px-5 py-5 ${monochrome ? 'border-neutral-300 bg-neutral-50' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900'}`}>
+        <AnimatedReveal delay={80} className={`mt-6 rounded-[24px] border px-5 py-5 ${monochrome ? 'border-neutral-300 bg-neutral-50' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-[#4A3520]'}`}>
           <View className="flex-row items-center justify-between gap-4">
             <View className="flex-1">
-              <Text className={`text-base font-bold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Modo preto e branco</Text>
+              <Text className={`text-base font-bold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Modo preto e branco</Text>
               <Text className={`mt-1 text-sm leading-5 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
                 Reduz cores e aumenta previsibilidade de contraste.
               </Text>
@@ -116,7 +116,7 @@ export default function ProfileScreen() {
           </View>
         </AnimatedReveal>
 
-        <AnimatedReveal delay={130} className={`mt-6 rounded-[28px] border px-5 py-7 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900'}`}>
+        <AnimatedReveal delay={130} className={`mt-6 rounded-[28px] border px-5 py-7 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-[#4A3520]'}`}>
           <View className="items-center">
             {user?.avatar_url ? (
               <Image source={{ uri: user.avatar_url }} className="h-24 w-24 rounded-full bg-stone-200 dark:bg-stone-700" resizeMode="cover" />
@@ -126,7 +126,7 @@ export default function ProfileScreen() {
               </View>
             )}
 
-            <Text className={`mt-4 text-lg font-bold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>
+            <Text className={`mt-4 text-lg font-bold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>
               {user?.full_name || 'Seu nome'}
             </Text>
             <Text className={`mt-1 text-sm ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>{user?.email}</Text>
@@ -156,7 +156,7 @@ export default function ProfileScreen() {
 
           <View className={`my-6 h-px ${monochrome ? 'bg-neutral-200' : 'bg-stone-100 dark:bg-stone-700'}`} />
 
-          <Text className={`mb-5 text-lg font-bold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Dados pessoais</Text>
+          <Text className={`mb-5 text-lg font-bold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Dados pessoais</Text>
 
           <Controller
             control={control}
@@ -207,7 +207,7 @@ export default function ProfileScreen() {
 
           <View className={`my-4 h-px ${monochrome ? 'bg-neutral-200' : 'bg-stone-100 dark:bg-stone-700'}`} />
 
-          <Text className={`mb-5 text-lg font-bold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Segurança</Text>
+          <Text className={`mb-5 text-lg font-bold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Segurança</Text>
 
           <Controller
             control={control}

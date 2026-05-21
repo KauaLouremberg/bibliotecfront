@@ -31,10 +31,10 @@ export function Button({
         ? 'bg-neutral-800'
         : 'bg-black'
     : variant === 'primary'
-      ? 'bg-stone-900 dark:bg-stone-100'
+      ? 'bg-[#8B6534]'
       : variant === 'danger'
         ? 'bg-rose-600 dark:bg-rose-500'
-        : 'border border-stone-200 bg-white dark:border-stone-600 dark:bg-stone-800';
+        : 'border border-[#8B6534]/40 bg-[#F5ECD7]';
 
   const spinnerColor = variant === 'secondary' ? (monochrome ? '#171717' : '#0f172a') : '#f8fafc';
 
@@ -42,12 +42,12 @@ export function Button({
     variant === 'secondary'
       ? monochrome
         ? 'text-black'
-        : 'text-stone-800 dark:text-stone-100'
+        : 'text-[#4A3520]'
       : monochrome
         ? 'text-white'
         : variant === 'danger'
           ? 'text-white'
-          : 'text-stone-50 dark:text-stone-900';
+          : 'text-white';
 
   return (
     <Pressable

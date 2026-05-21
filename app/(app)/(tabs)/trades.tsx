@@ -29,10 +29,10 @@ function TradeCard({
   disabled: boolean;
 }) {
   return (
-    <View className={`rounded-[24px] border px-5 py-5 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900'}`}>
+    <View className={`rounded-[24px] border px-5 py-5 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-[#4A3520]'}`}>
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1">
-          <Text className={`text-xl font-bold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>{trade.book_requested.title}</Text>
+          <Text className={`text-xl font-bold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>{trade.book_requested.title}</Text>
           <Text className={`mt-1 text-sm ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>{trade.book_requested.author}</Text>
         </View>
         <Pill label={tradeStatusLabels[trade.status]} tone={tradeStatusTones[trade.status]} />
@@ -42,7 +42,7 @@ function TradeCard({
         <Text className={`text-xs uppercase tracking-[1px] ${monochrome ? 'text-neutral-500' : 'text-stone-600 dark:text-stone-400'}`}>
           {trade.is_incoming ? 'Solicitado por' : 'Enviado para'}
         </Text>
-        <Text className={`mt-2 text-base font-semibold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>
+        <Text className={`mt-2 text-base font-semibold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>
           {trade.is_incoming
             ? trade.requester.full_name || trade.requester.email
             : trade.owner.full_name || trade.owner.email}
@@ -55,7 +55,7 @@ function TradeCard({
       {trade.book_offered ? (
         <View className="mt-4">
           <Text className={`text-xs uppercase tracking-[1px] ${monochrome ? 'text-neutral-500' : 'text-stone-600 dark:text-stone-400'}`}>Livro oferecido</Text>
-          <Text className={`mt-2 text-base font-semibold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>{trade.book_offered.title}</Text>
+          <Text className={`mt-2 text-base font-semibold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>{trade.book_offered.title}</Text>
           <Text className={`mt-1 text-sm ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>{trade.book_offered.author}</Text>
         </View>
       ) : null}
@@ -112,21 +112,21 @@ export default function TradesScreen() {
   }
 
   return (
-    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-stone-950'}`}>
+    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`}>
       <View className="px-5 pb-32 pt-6">
         <AnimatedReveal>
-          <Text className={`text-3xl font-black ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Negociações</Text>
+          <Text className={`text-3xl font-black ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Negociações</Text>
           <Text className={`mt-2 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
             Acompanhe propostas enviadas e recebidas sem sair do app.
           </Text>
         </AnimatedReveal>
 
         <AnimatedReveal delay={100} className="mt-8">
-          <Text className={`text-xl font-bold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Recebidas</Text>
+          <Text className={`text-xl font-bold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Recebidas</Text>
           <Text className={`mt-1 text-sm ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>Solicitações para livros do seu inventário.</Text>
 
           {tradesQuery.isPending ? (
-            <View className={`mt-4 rounded-[24px] px-5 py-6 ${monochrome ? 'border border-neutral-300 bg-white' : 'bg-white dark:bg-stone-900'}`}>
+            <View className={`mt-4 rounded-[24px] px-5 py-6 ${monochrome ? 'border border-neutral-300 bg-white' : 'bg-white dark:bg-[#4A3520]'}`}>
               <Text className={`text-base ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>Carregando negociações...</Text>
             </View>
           ) : incoming.length ? (
@@ -145,14 +145,14 @@ export default function TradesScreen() {
               ))}
             </View>
           ) : (
-            <View className={`mt-4 rounded-[24px] px-5 py-6 ${monochrome ? 'border border-neutral-300 bg-white' : 'bg-white dark:bg-stone-900'}`}>
+            <View className={`mt-4 rounded-[24px] px-5 py-6 ${monochrome ? 'border border-neutral-300 bg-white' : 'bg-white dark:bg-[#4A3520]'}`}>
               <Text className={`text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>Nenhuma proposta recebida por enquanto.</Text>
             </View>
           )}
         </AnimatedReveal>
 
         <AnimatedReveal delay={180} className="mt-10">
-          <Text className={`text-xl font-bold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Enviadas</Text>
+          <Text className={`text-xl font-bold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Enviadas</Text>
           <Text className={`mt-1 text-sm ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>Propostas que você abriu com outros usuários.</Text>
 
           {outgoing.length ? (
@@ -171,7 +171,7 @@ export default function TradesScreen() {
               ))}
             </View>
           ) : (
-            <View className={`mt-4 rounded-[24px] px-5 py-6 ${monochrome ? 'border border-neutral-300 bg-white' : 'bg-white dark:bg-stone-900'}`}>
+            <View className={`mt-4 rounded-[24px] px-5 py-6 ${monochrome ? 'border border-neutral-300 bg-white' : 'bg-white dark:bg-[#4A3520]'}`}>
               <Text className={`text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>Você ainda não enviou nenhuma proposta.</Text>
             </View>
           )}

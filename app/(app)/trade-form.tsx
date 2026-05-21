@@ -56,7 +56,7 @@ export default function TradeFormScreen() {
 
   if (discoverQuery.isPending || inventoryQuery.isPending) {
     return (
-      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-stone-950'}`}>
+      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`}>
         <Text className={`text-base ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>Carregando proposta...</Text>
       </View>
     );
@@ -64,7 +64,7 @@ export default function TradeFormScreen() {
 
   if (!requestedBook) {
     return (
-      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-stone-950'}`}>
+      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`}>
         <Text className={`text-center text-base ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
           Livro não encontrado na busca. Atualize a lista e tente novamente.
         </Text>
@@ -74,7 +74,7 @@ export default function TradeFormScreen() {
 
   if (!canNegotiate(requestedBook.sharing_status)) {
     return (
-      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-stone-950'}`}>
+      <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`}>
         <Text className={`text-center text-base ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
           Este livro está apenas visível no perfil e não está disponível para negociação.
         </Text>
@@ -86,22 +86,22 @@ export default function TradeFormScreen() {
   }
 
   return (
-    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#f4ead7] dark:bg-stone-950'}`} keyboardShouldPersistTaps="handled">
+    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`} keyboardShouldPersistTaps="handled">
       <View className="px-5 pb-12 pt-6">
         <TouchableOpacity className={`mb-6 self-start rounded-full border px-4 py-2 ${monochrome ? 'border-neutral-300' : 'border-stone-300 dark:border-stone-600'}`} onPress={() => router.back()}>
           <Text className={`text-sm font-bold ${monochrome ? 'text-black' : 'text-stone-800 dark:text-stone-200'}`}>Fechar</Text>
         </TouchableOpacity>
         <AnimatedReveal>
-          <Text className={`text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Proposta de troca</Text>
+          <Text className={`text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Proposta de troca</Text>
           <Text className={`mt-2 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
             Escolha um livro seu para oferecer, ou envie apenas uma mensagem se quiser negociar sem contrapartida imediata.
           </Text>
         </AnimatedReveal>
 
-        <AnimatedReveal delay={100} className={`mt-6 rounded-[24px] border px-5 py-6 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-stone-900'}`}>
-          <View className={`rounded-2xl px-4 py-4 ${monochrome ? 'bg-neutral-100' : 'bg-orange-50 dark:bg-orange-900/20'}`}>
-            <Text className={`text-xs uppercase tracking-[1px] ${monochrome ? 'text-neutral-500' : 'text-orange-700 dark:text-orange-400'}`}>Livro solicitado</Text>
-            <Text className={`mt-2 text-xl font-bold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>{requestedBook.title}</Text>
+        <AnimatedReveal delay={100} className={`mt-6 rounded-[24px] border px-5 py-6 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-700 dark:bg-[#4A3520]'}`}>
+          <View className={`rounded-2xl px-4 py-4 ${monochrome ? 'bg-neutral-100' : 'bg-[#F5ECD7] dark:bg-[#F5ECD7]'}`}>
+            <Text className={`text-xs uppercase tracking-[1px] ${monochrome ? 'text-neutral-500' : 'text-[#8B6534] dark:text-[#C9A96E]'}`}>Livro solicitado</Text>
+            <Text className={`mt-2 text-xl font-bold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>{requestedBook.title}</Text>
             <Text className={`mt-1 text-base ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>{requestedBook.author}</Text>
             <Text className={`mt-3 text-sm ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
               Proprietário: {requestedBook.owner.full_name || requestedBook.owner.email}
@@ -113,14 +113,14 @@ export default function TradeFormScreen() {
             <TouchableOpacity
               className={`mb-3 rounded-2xl border px-4 py-4 ${
                 selectedOfferedBookId === null
-                  ? monochrome ? 'border-black bg-neutral-100' : 'border-orange-500 bg-orange-50 dark:border-orange-500 dark:bg-orange-900/20'
+                  ? monochrome ? 'border-black bg-neutral-100' : 'border-[#8B6534] bg-[#F5ECD7] dark:border-[#8B6534] dark:bg-[#F5ECD7]'
                   : monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-600 dark:bg-stone-800'
               }`}
               disabled={createTradeMutation.isPending}
               onPress={() => {
                 setValue('book_offered_id', null);
               }}>
-              <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>Sem livro oferecido</Text>
+              <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Sem livro oferecido</Text>
               <Text className={`mt-1 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
                 Use quando você quiser abrir a conversa primeiro.
               </Text>
@@ -138,14 +138,14 @@ export default function TradeFormScreen() {
                         key={book.id}
                         className={`rounded-2xl border px-4 py-4 ${
                           selected
-                            ? monochrome ? 'border-black bg-neutral-100' : 'border-orange-500 bg-orange-50 dark:border-orange-500 dark:bg-orange-900/20'
+                            ? monochrome ? 'border-black bg-neutral-100' : 'border-[#8B6534] bg-[#F5ECD7] dark:border-[#8B6534] dark:bg-[#F5ECD7]'
                             : monochrome ? 'border-neutral-300 bg-white' : 'border-stone-200 bg-white dark:border-stone-600 dark:bg-stone-800'
                         }`}
                         disabled={createTradeMutation.isPending}
                         onPress={() => {
                           setValue('book_offered_id', book.id);
                         }}>
-                        <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-stone-900 dark:text-white'}`}>{book.title}</Text>
+                        <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>{book.title}</Text>
                         <Text className={`mt-1 text-sm ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>{book.author}</Text>
                       </TouchableOpacity>
                     );
