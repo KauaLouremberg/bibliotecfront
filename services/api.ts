@@ -43,7 +43,15 @@ function isPublicAuthPath(url: string | undefined): boolean {
 
 api.interceptors.request.use(async (config) => {
   if (config.data instanceof FormData && config.headers) {
-    delete (config.headers as Record<string, unknown>)['Content-Type'];
+    const headers = config.headers as InternalAxiosRequestConfig['headers'] & {
+      setContentType?: (value: string | false) => void;
+    };
+    if (typeof headers.setContentType === 'function') {
+      headers.setContentType(false);
+    } else {
+      delete (headers as Record<string, unknown>)['Content-Type'];
+      delete (headers as Record<string, unknown>)['content-type'];
+    }
   }
   if (isPublicAuthPath(config.url)) {
     if (config.headers) {

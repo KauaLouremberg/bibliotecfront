@@ -6,8 +6,8 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import ToastManager from 'toastify-react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import '../global.css';
 
@@ -39,16 +39,20 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (error) throw error;
+    if (error) {
+      console.warn('Fontes opcionais não carregaram; app continua sem SpaceMono.', error);
+    }
   }, [error]);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+  const fontsReady = loaded || !!error;
 
-  if (!loaded) {
+  useEffect(() => {
+    if (fontsReady) {
+      void SplashScreen.hideAsync();
+    }
+  }, [fontsReady]);
+
+  if (!fontsReady) {
     return null;
   }
 
@@ -58,17 +62,39 @@ export default function RootLayout() {
         <InterfaceProvider>
           <AuthProvider>
             <RootLayoutNav />
-            <ToastManager
-              duration={4000}
-              position="top"
-              showCloseIcon
-              showProgressBar={false}
-              useModal={false}
-            />
+            <ToastHost />
           </AuthProvider>
         </InterfaceProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
+  );
+}
+
+function ToastHost() {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <ToastManager
+      animationStyle="slide"
+      closeIconColor="#F5ECD7"
+      duration={4000}
+      iconSize={22}
+      minHeight={72}
+      position="top"
+      showCloseIcon
+      showProgressBar
+      style={{
+        borderColor: '#C9A96E',
+        borderRadius: 22,
+        borderWidth: 1,
+        overflow: 'hidden',
+        paddingVertical: 8,
+      }}
+      textStyle={{ fontWeight: '700' }}
+      topOffset={Math.max(insets.top + 12, 24)}
+      useModal
+      width="92%"
+    />
   );
 }
 
