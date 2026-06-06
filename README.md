@@ -25,7 +25,7 @@ Cliente mobile **Acervo** em **Expo SDK 54** com **Expo Router**, **NativeWind**
    npm install
    ```
 
-## Correr o projeto
+## Rodar o projeto
 
 ```bash
 npm run start
@@ -34,7 +34,7 @@ npm run start
 Ou `npx expo start`. Depois escolha **Android**, **iOS** ou **web** no terminal ou na interface do Expo.
 
 - Em **dispositivo físico**, o app substitui automaticamente `127.0.0.1` pelo IP da máquina (o mesmo que o Metro mostra no QR). Pode forçar com `EXPO_PUBLIC_API_URL=http://SEU_IP:8000` no `.env`.
-- O Django deve correr na rede: `python manage.py runserver 0.0.0.0:8000` (PC e telemóvel na mesma Wi‑Fi).
+- O Django deve rodar na rede: `python manage.py runserver 0.0.0.0:8000` (PC e telemóvel na mesma Wi‑Fi).
 - O APK de release sai como **`Acervo-release.apk`** (plugin em `plugins/withAcervoApkName.js`).
 
 ### Gerar APK (release)
