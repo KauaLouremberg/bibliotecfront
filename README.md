@@ -45,12 +45,6 @@ Requisito: **JDK 17** (Java 26 quebra o Gradle).
 sudo pacman -S jdk17-openjdk
 ```
 
-Confirme `.env` com a URL do Render:
-
-```
-EXPO_PUBLIC_API_URL=https://acervo-api.onrender.com
-```
-
 ```bash
 pnpm run android:release
 ```
