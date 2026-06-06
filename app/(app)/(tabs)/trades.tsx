@@ -113,7 +113,7 @@ export default function TradesScreen() {
 
   return (
     <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`}>
-      <View className="px-5 pb-32 pt-6">
+      <View className="px-5 pb-4 pt-4">
         <AnimatedReveal>
           <Text className={`text-3xl font-black ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Negociações</Text>
           <Text className={`mt-2 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>

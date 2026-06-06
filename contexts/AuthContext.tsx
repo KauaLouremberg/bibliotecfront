@@ -98,6 +98,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return data;
     },
     onSuccess: async (data) => {
+      queryClient.removeQueries({
+        predicate: (query) => {
+          const root = query.queryKey[0];
+          return root === 'signal-chats' || root === 'signal-chat-messages' || root === 'signal-chat-thread';
+        },
+      });
       await persistTokens(data.access, data.refresh);
       setAccessToken(data.access);
       await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
@@ -110,6 +116,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return data;
     },
     onSuccess: async (data) => {
+      queryClient.removeQueries({
+        predicate: (query) => {
+          const root = query.queryKey[0];
+          return root === 'signal-chats' || root === 'signal-chat-messages' || root === 'signal-chat-thread';
+        },
+      });
       await persistTokens(data.access, data.refresh);
       setAccessToken(data.access);
       await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
@@ -174,7 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     await clearStoredTokens();
     setAccessToken(null);
-    queryClient.removeQueries({ queryKey: ['auth', 'me'] });
+    queryClient.clear();
     router.dismissAll();
     router.replace('/(auth)/login');
   }, [queryClient]);

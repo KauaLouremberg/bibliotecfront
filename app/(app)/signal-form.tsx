@@ -9,6 +9,7 @@ import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { postIntentOptions } from '@/constants/library';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
+import { useAppInsets } from '@/hooks/useAppInsets';
 import {
   useCommunityFeed,
   useDeleteSocialPost,
@@ -35,6 +36,7 @@ const emptyValues: SocialPostFormValues = {
 
 export default function SignalFormScreen() {
   const { monochrome } = useInterfaceMode();
+  const { topInset } = useAppInsets();
   const params = useLocalSearchParams<{
     postId?: string | string[];
     inventoryBookId?: string | string[];
@@ -123,7 +125,7 @@ export default function SignalFormScreen() {
 
   return (
     <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#4A3520]'}`} keyboardShouldPersistTaps="handled">
-      <View className="px-5 pb-12 pt-6">
+      <View className="px-5 pb-12" style={{ paddingTop: topInset }}>
         <TouchableOpacity className={`mb-6 self-start rounded-full border px-4 py-2 ${monochrome ? 'border-neutral-300' : 'border-white/20'}`} onPress={() => router.back()}>
           <Text className={`text-sm font-bold ${monochrome ? 'text-black' : 'text-white'}`}>Fechar</Text>
         </TouchableOpacity>

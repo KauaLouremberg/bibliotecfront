@@ -8,6 +8,7 @@ import { AnimatedReveal } from '@/components/AnimatedReveal';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
+import { useAppInsets } from '@/hooks/useAppInsets';
 import { useCreateTradeRequest, useDiscoverInventory, useMyInventory } from '@/hooks/useLibrary';
 import { useToastOnQueryError } from '@/hooks/useToastOnQueryError';
 import { tradeRequestSchema, type TradeRequestFormValues } from '@/schemas/library';
@@ -24,6 +25,7 @@ function canNegotiate(status: string) {
 
 export default function TradeFormScreen() {
   const { monochrome } = useInterfaceMode();
+  const { topInset } = useAppInsets();
   const params = useLocalSearchParams<{ requestedBookId?: string | string[] }>();
   const requestedBookId = Number(firstParam(params.requestedBookId) ?? 0) || 0;
   const discoverQuery = useDiscoverInventory();
@@ -87,7 +89,7 @@ export default function TradeFormScreen() {
 
   return (
     <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`} keyboardShouldPersistTaps="handled">
-      <View className="px-5 pb-12 pt-6">
+      <View className="px-5 pb-12" style={{ paddingTop: topInset }}>
         <TouchableOpacity className={`mb-6 self-start rounded-full border px-4 py-2 ${monochrome ? 'border-neutral-300' : 'border-stone-300 dark:border-stone-600'}`} onPress={() => router.back()}>
           <Text className={`text-sm font-bold ${monochrome ? 'text-black' : 'text-stone-800 dark:text-stone-200'}`}>Fechar</Text>
         </TouchableOpacity>

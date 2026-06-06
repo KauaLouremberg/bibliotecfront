@@ -15,7 +15,7 @@ import { showErrorToast, showSuccessToast, showWarningToast } from '@/utils/feed
 
 function fallbackAvatar(name: string | undefined) {
   const letter = name?.trim().charAt(0).toUpperCase();
-  return letter || 'B';
+  return letter || 'A';
 }
 
 const maxAvatarSize = 5 * 1024 * 1024;
@@ -91,7 +91,7 @@ export default function ProfileScreen() {
 
   return (
     <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`} keyboardShouldPersistTaps="handled">
-      <View className="px-5 pb-32 pt-6">
+      <View className="px-5 pb-4 pt-4">
         <AnimatedReveal>
           <Text className={`text-3xl font-black ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Perfil</Text>
           <Text className={`mt-2 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>

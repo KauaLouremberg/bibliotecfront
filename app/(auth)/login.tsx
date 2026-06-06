@@ -2,10 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Link } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedReveal } from '@/components/AnimatedReveal';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
+import { APP_NAME } from '@/constants/brand';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useAuth } from '@/hooks/useAuth';
 import { loginSchema, type LoginFormValues } from '@/schemas/auth';
@@ -26,15 +28,16 @@ export default function LoginScreen() {
   });
 
   return (
+    <SafeAreaView edges={['top', 'bottom']} className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7]'}`}>
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7]'}`}>
+      className="flex-1">
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerClassName="flex-grow justify-center px-6 py-10"
         contentContainerStyle={{ flexGrow: 1 }}>
         <AnimatedReveal className={`w-full max-w-md self-center rounded-[32px] border px-6 py-8 ${monochrome ? 'border-neutral-300 bg-white' : 'border-[#C9A96E]/45 bg-[#E8D5B0]'}`}>
-          <Text className={`text-sm font-bold uppercase tracking-[2px] ${monochrome ? 'text-neutral-500' : 'text-[#8B6534]'}`}>Bibliotec</Text>
+          <Text className={`text-sm font-bold uppercase tracking-[2px] ${monochrome ? 'text-neutral-500' : 'text-[#8B6534]'}`}>{APP_NAME}</Text>
           <Text className={`mt-3 text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>Entre no seu acervo</Text>
           <Text className={`mb-8 mt-3 text-base leading-6 ${monochrome ? 'text-neutral-700' : 'text-[#4A3520]/75'}`}>
             Continue organizando livros, propostas e conexões da comunidade.
@@ -99,5 +102,6 @@ export default function LoginScreen() {
         </AnimatedReveal>
       </ScrollView>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

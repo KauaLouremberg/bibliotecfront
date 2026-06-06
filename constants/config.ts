@@ -41,5 +41,7 @@ function resolveApiUrl(): string {
 
 export const API_URL = resolveApiUrl();
 
+export const WS_URL = API_URL.replace(/^http/, 'ws');
+
 export const SECURE_ACCESS_KEY = 'bibliotec_access_token';
 export const SECURE_REFRESH_KEY = 'bibliotec_refresh_token';

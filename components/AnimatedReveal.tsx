@@ -6,7 +6,14 @@ type AnimatedRevealProps = PropsWithChildren<{
   distance?: number;
   className?: string;
   style?: ViewStyle;
+  /** Desativa animação (útil em listas que remontam com frequência). */
+  static?: boolean;
 }>;
+
+function revealVisible(opacity: Animated.Value, translateY: Animated.Value) {
+  opacity.setValue(1);
+  translateY.setValue(0);
+}
 
 export function AnimatedReveal({
   children,
@@ -14,12 +21,21 @@ export function AnimatedReveal({
   distance = 14,
   className,
   style,
+  static: isStatic = false,
 }: AnimatedRevealProps) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const translateY = useRef(new Animated.Value(distance)).current;
+  const opacity = useRef(new Animated.Value(isStatic ? 1 : 0)).current;
+  const translateY = useRef(new Animated.Value(isStatic ? 0 : distance)).current;
 
   useEffect(() => {
-    Animated.parallel([
+    if (isStatic) {
+      revealVisible(opacity, translateY);
+      return;
+    }
+
+    opacity.setValue(0);
+    translateY.setValue(distance);
+
+    const animation = Animated.parallel([
       Animated.timing(opacity, {
         toValue: 1,
         duration: 420,
@@ -34,8 +50,20 @@ export function AnimatedReveal({
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
-    ]).start();
-  }, [delay, opacity, translateY]);
+    ]);
+
+    animation.start(({ finished }) => {
+      if (finished) {
+        revealVisible(opacity, translateY);
+      }
+    });
+
+    return () => {
+      animation.stop();
+      // Evita conteúdo invisível quando o efeito é interrompido (Strict Mode, refetch, etc.).
+      revealVisible(opacity, translateY);
+    };
+  }, [delay, distance, isStatic, opacity, translateY]);
 
   return (
     <Animated.View

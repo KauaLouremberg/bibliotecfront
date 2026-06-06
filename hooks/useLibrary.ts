@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 
 import { api } from '@/services/api';
 
@@ -177,6 +177,7 @@ export function useMyInventory() {
       const { data } = await api.get<InventoryCollection>('/api/library/inventory/mine');
       return data;
     },
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -192,6 +193,7 @@ export function useCatalogBooks(filters?: { search?: string; genre?: string }) {
       });
       return data;
     },
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -215,6 +217,7 @@ export function useDiscoverInventory(filters?: { search?: string; trade_status?:
       });
       return data;
     },
+    placeholderData: keepPreviousData,
   });
 }
 

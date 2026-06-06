@@ -3,14 +3,16 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Link, Tabs } from 'expo-router';
 import { Pressable, useColorScheme } from 'react-native';
 
+import { useAppInsets } from '@/hooks/useAppInsets';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useAuthenticatedBackGuard } from '@/hooks/useAuthenticatedBackGuard';
+import { useTabBarLayout } from '@/hooks/useTabBarLayout';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof FontAwesome>['name'];
   color: string;
 }) {
-  return <FontAwesome size={24} style={{ marginBottom: -2 }} {...props} />;
+  return <FontAwesome size={22} {...props} />;
 }
 
 export default function TabLayout() {
@@ -27,6 +29,13 @@ export default function TabLayout() {
   const headerClr = monochrome ? '#111111' : isDark ? '#F5ECD7' : '#4A3520';
   const actionClr = monochrome ? '#111111' : '#8B6534';
 
+  const { topInset, headerStatusBarHeight } = useAppInsets();
+  const { tabBarStyle, tabBarItemStyle, tabBarLabelStyle, scrollBottomPadding } = useTabBarLayout({
+    backgroundColor: tabBarBg,
+    borderColor: borderClr,
+    isDark,
+  });
+
   return (
     <Tabs
       screenOptions={{
@@ -36,29 +45,13 @@ export default function TabLayout() {
         headerShadowVisible: false,
         headerStyle: { backgroundColor: headerBg },
         headerTitleStyle: { color: headerClr, fontWeight: '800' },
-        tabBarStyle: {
-          position: 'absolute',
-          left: 16,
-          right: 16,
-          bottom: 14,
-          backgroundColor: tabBarBg,
-          borderTopColor: borderClr,
-          borderColor: borderClr,
-          borderWidth: 1,
-          borderRadius: 28,
-          height: 66,
-          paddingBottom: 10,
-          paddingTop: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: isDark ? 0.3 : 0.1,
-          shadowRadius: 16,
-          elevation: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '700',
-        },
+        headerStatusBarHeight,
+        tabBarStyle,
+        tabBarItemStyle,
+        tabBarLabelStyle,
+        tabBarAllowFontScaling: false,
+        tabBarHideOnKeyboard: true,
+        sceneStyle: { paddingBottom: scrollBottomPadding },
       }}>
       <Tabs.Screen
         name="index"
@@ -109,13 +102,15 @@ export default function TabLayout() {
         options={{
           title: 'Perfil',
           tabBarIcon: ({ color }) => <TabBarIcon name="user-circle" color={color} />,
+          sceneStyle: { paddingTop: topInset, paddingBottom: scrollBottomPadding },
         }}
       />
       <Tabs.Screen
         name="trades"
         options={{
-          title: 'Negociações',
+          title: 'Trocas',
           tabBarIcon: ({ color }) => <TabBarIcon name="exchange" color={color} />,
+          sceneStyle: { paddingTop: topInset, paddingBottom: scrollBottomPadding },
         }}
       />
     </Tabs>

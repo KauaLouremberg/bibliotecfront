@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { FlatList, RefreshControl, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
-import * as Linking from 'expo-linking';
 
 import { AnimatedReveal } from '@/components/AnimatedReveal';
 import { Button } from '@/components/Button';
@@ -8,7 +8,10 @@ import { Pill } from '@/components/Pill';
 import { postIntentLabels, postIntentTones, sharingStatusLabels } from '@/constants/library';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useCommunityFeed } from '@/hooks/useLibrary';
+import { useOpenSignalChat, useSignalChatThreads } from '@/hooks/useSignalChat';
 import { useToastOnQueryError } from '@/hooks/useToastOnQueryError';
+import { extractApiErrorMessage } from '@/utils/apiError';
+import { showErrorToast } from '@/utils/feedback';
 
 function formatDateLabel(value: string) {
   return new Intl.DateTimeFormat('pt-BR', {
@@ -19,11 +22,29 @@ function formatDateLabel(value: string) {
 
 export default function CommunityFeedScreen() {
   const feedQuery = useCommunityFeed();
+  const chatsQuery = useSignalChatThreads();
+  const openChat = useOpenSignalChat();
   const { monochrome } = useInterfaceMode();
+  const [openingPostId, setOpeningPostId] = useState<number | null>(null);
   useToastOnQueryError(feedQuery, 'Feed indisponível', 'Não foi possível carregar os sinais da comunidade.');
   const { height } = useWindowDimensions();
   const feed = feedQuery.data;
   const cardHeight = Math.max(520, height - 250);
+
+  async function startChat(postId: number) {
+    setOpeningPostId(postId);
+    try {
+      const data = await openChat.mutateAsync(postId);
+      router.push({
+        pathname: '/(app)/signal-chat/[threadId]',
+        params: { threadId: String(data.thread.id) },
+      });
+    } catch (error) {
+      showErrorToast('Não foi possível abrir o chat', extractApiErrorMessage(error, 'Tente novamente.'));
+    } finally {
+      setOpeningPostId(null);
+    }
+  }
 
   return (
     <View className={`flex-1 ${monochrome ? 'bg-black' : 'bg-[#4A3520]'}`}>
@@ -40,6 +61,30 @@ export default function CommunityFeedScreen() {
           <Pill label={`${feed?.stats.exchange_posts ?? 0} trocas`} tone="accent" />
           <Pill label={`${feed?.stats.loan_posts ?? 0} empréstimos`} tone="danger" />
         </View>
+
+        {chatsQuery.data && chatsQuery.data.length > 0 ? (
+          <View className="mt-6 rounded-[24px] bg-white/5 px-4 py-4">
+            <Text className="text-xs uppercase tracking-[1px] text-stone-400">Conversas abertas</Text>
+            <View className="mt-3 gap-2">
+              {chatsQuery.data.map((thread) => (
+                <TouchableOpacity
+                  key={thread.id}
+                  className="rounded-2xl bg-white/5 px-4 py-3"
+                  onPress={() => {
+                    router.push({
+                      pathname: '/(app)/signal-chat/[threadId]',
+                      params: { threadId: String(thread.id) },
+                    });
+                  }}>
+                  <Text className="text-sm font-semibold text-white">{thread.post.book_title}</Text>
+                  <Text className="mt-1 text-xs text-stone-400">
+                    com {thread.other_participant.full_name || thread.other_participant.email}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        ) : null}
       </AnimatedReveal>
 
       {feedQuery.isPending ? (
@@ -60,10 +105,11 @@ export default function CommunityFeedScreen() {
               tintColor="#fb923c"
               onRefresh={() => {
                 void feedQuery.refetch();
+                void chatsQuery.refetch();
               }}
             />
           }
-          contentContainerClassName="px-5 pb-10"
+          contentContainerClassName="px-5 pb-4"
           renderItem={({ item }) => (
             <View
               style={{ minHeight: cardHeight }}
@@ -86,7 +132,6 @@ export default function CommunityFeedScreen() {
                 <Text className="mt-2 text-xl font-semibold text-white">
                   {item.owner.full_name || item.owner.email}
                 </Text>
-                <Text className="mt-1 text-base text-stone-400">{item.owner.email}</Text>
                 {item.location_label ? (
                   <Text className="mt-3 text-sm text-stone-400">Local de referência: {item.location_label}</Text>
                 ) : null}
@@ -127,10 +172,9 @@ export default function CommunityFeedScreen() {
                 ) : (
                   <View className="gap-3">
                     <Button
+                      loading={openingPostId === item.id}
                       onPress={() => {
-                        void Linking.openURL(
-                          `mailto:${item.owner.email}?subject=${encodeURIComponent(`Contato sobre ${item.book_title}`)}`,
-                        );
+                        void startChat(item.id);
                       }}>
                       Falar com {item.owner.full_name?.split(' ')[0] || 'usuário'}
                     </Button>

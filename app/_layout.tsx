@@ -7,6 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import ToastManager from 'toastify-react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import '../global.css';
 
@@ -52,20 +53,22 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <InterfaceProvider>
-        <AuthProvider>
-          <RootLayoutNav />
-          <ToastManager
-            duration={4000}
-            position="top"
-            showCloseIcon
-            showProgressBar={false}
-            useModal={false}
-          />
-        </AuthProvider>
-      </InterfaceProvider>
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <InterfaceProvider>
+          <AuthProvider>
+            <RootLayoutNav />
+            <ToastManager
+              duration={4000}
+              position="top"
+              showCloseIcon
+              showProgressBar={false}
+              useModal={false}
+            />
+          </AuthProvider>
+        </InterfaceProvider>
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }
 

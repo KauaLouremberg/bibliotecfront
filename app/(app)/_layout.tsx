@@ -33,6 +33,13 @@ export default function AppGroupLayout() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="signal-chat/[threadId]"
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

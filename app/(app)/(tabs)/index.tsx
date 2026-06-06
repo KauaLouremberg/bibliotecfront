@@ -10,6 +10,7 @@ import {
   sharingStatusLabels,
   sharingStatusTones,
 } from '@/constants/library';
+import { APP_NAME } from '@/constants/brand';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -119,11 +120,11 @@ export default function InventoryScreen() {
           }}
         />
       }>
-      <View className="px-5 pb-28 pt-6">
+      <View className="px-5 pb-4 pt-4">
         <AnimatedReveal className={`overflow-hidden rounded-[28px] px-6 py-7 ${monochrome ? 'border border-neutral-300 bg-neutral-950' : 'bg-[#4A3520]'}`}>
           <Text className={`text-sm uppercase tracking-[1.5px] ${monochrome ? 'text-neutral-400' : 'text-[#C9A96E]'}`}>Meu acervo digital</Text>
           <Text className="mt-3 text-2xl font-bold leading-snug text-[#F5ECD7]">
-            {user?.full_name ? `${user.full_name},` : 'Bibliotec,'} pesquise livros reais e monte seu inventário.
+            {user?.full_name ? `${user.full_name},` : `${APP_NAME},`} pesquise livros reais e monte seu inventário.
           </Text>
           <Text className={`mt-3 text-sm leading-6 ${monochrome ? 'text-neutral-300' : 'text-[#E8D5B0]'}`}>
             Busque metadados online, salve o livro no seu acervo e defina se ele fica privado, visível, disponível para empréstimo, troca ou doação.
@@ -192,7 +193,7 @@ export default function InventoryScreen() {
             </ScrollView>
           </View>
 
-          {catalogQuery.isPending ? (
+          {catalogQuery.isPending && !catalog ? (
             <View className={`mt-5 rounded-[24px] border px-5 py-6 ${card}`}>
               <Text className={`text-base ${muted}`}>Consultando catálogo...</Text>
             </View>
@@ -203,7 +204,7 @@ export default function InventoryScreen() {
               className="mt-5"
               contentContainerClassName="gap-4 pr-5">
               {catalog.items.map((book) => (
-                <AnimatedReveal key={book.id} className={`min-h-[430px] w-[310px] rounded-[24px] border p-5 ${card}`}>
+                <View key={book.id} className={`min-h-[430px] w-[310px] rounded-[24px] border p-5 ${card}`}>
                   <View className="flex-1">
                   <View className="flex-row gap-4">
                     {book.cover_url ? (
@@ -234,7 +235,7 @@ export default function InventoryScreen() {
                     Adicionar ao inventário
                   </Button>
                   </View>
-                </AnimatedReveal>
+                </View>
               ))}
             </ScrollView>
           ) : (
@@ -261,14 +262,14 @@ export default function InventoryScreen() {
             </TouchableOpacity>
           </View>
 
-          {inventoryQuery.isPending ? (
+          {inventoryQuery.isPending && !inventory ? (
             <View className={`rounded-[24px] border px-5 py-6 ${card}`}>
               <Text className={`text-base ${muted}`}>Carregando inventário...</Text>
             </View>
           ) : inventory?.items.length ? (
             <View className="gap-5">
-              {inventory.items.map((book, index) => (
-                <AnimatedReveal key={book.id} delay={index * 70} className={`rounded-[24px] border p-5 ${card}`}>
+              {inventory.items.map((book) => (
+                <View key={book.id} className={`rounded-[24px] border p-5 ${card}`}>
                   <View className="flex-row gap-4">
                     {book.cover_url ? (
                       <Image
@@ -355,7 +356,7 @@ export default function InventoryScreen() {
                       Editar
                     </Button>
                   </View>
-                </AnimatedReveal>
+                </View>
               ))}
             </View>
           ) : (
@@ -369,7 +370,7 @@ export default function InventoryScreen() {
         </AnimatedReveal>
 
         <AnimatedReveal delay={180} className="mt-10">
-          <Text className={`text-2xl font-bold ${heading}`}>Bibliotecas abertas</Text>
+          <Text className={`text-2xl font-bold ${heading}`}>Acervos abertos</Text>
           <Text className={`mt-1 text-sm ${muted}`}>
             Livros públicos de outros usuários. A busca aceita título, autor ou gênero.
           </Text>
@@ -422,7 +423,7 @@ export default function InventoryScreen() {
             </View>
           </View>
 
-          {discoverQuery.isPending ? (
+          {discoverQuery.isPending && !discover ? (
             <View className={`mt-5 rounded-[24px] border px-5 py-6 ${card}`}>
               <Text className={`text-base ${muted}`}>Carregando comunidade...</Text>
             </View>
@@ -433,7 +434,7 @@ export default function InventoryScreen() {
               className="mt-5"
               contentContainerClassName="gap-4 pr-5">
               {discover.items.map((book) => (
-                <AnimatedReveal key={book.id} className={`w-[300px] rounded-[24px] border p-5 ${card}`}>
+                <View key={book.id} className={`w-[300px] rounded-[24px] border p-5 ${card}`}>
                   <View className="flex-row items-start justify-between">
                     <Pill
                       label={sharingStatusLabels[book.sharing_status]}
@@ -483,7 +484,7 @@ export default function InventoryScreen() {
                     }}>
                     {canNegotiate(book.sharing_status) ? 'Propor troca' : 'Indisponível'}
                   </Button>
-                </AnimatedReveal>
+                </View>
               ))}
             </ScrollView>
           ) : (

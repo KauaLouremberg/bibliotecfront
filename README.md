@@ -1,6 +1,6 @@
-# Bibliotec (front)
+# Acervo (front)
 
-Cliente mobile em **Expo SDK 54** com **Expo Router**, **NativeWind**, **TanStack Query**, **React Hook Form** + **Zod**, **Axios** (`services/api.ts`) e **expo-secure-store** para tokens JWT.
+Cliente mobile **Acervo** em **Expo SDK 54** com **Expo Router**, **NativeWind**, **TanStack Query**, **React Hook Form** + **Zod**, **Axios** (`services/api.ts`) e **expo-secure-store** para tokens JWT.
 
 ## Pré-requisitos
 
@@ -35,6 +35,33 @@ Ou `npx expo start`. Depois escolha **Android**, **iOS** ou **web** no terminal 
 
 - Em **dispositivo físico**, o app substitui automaticamente `127.0.0.1` pelo IP da máquina (o mesmo que o Metro mostra no QR). Pode forçar com `EXPO_PUBLIC_API_URL=http://SEU_IP:8000` no `.env`.
 - O Django deve correr na rede: `python manage.py runserver 0.0.0.0:8000` (PC e telemóvel na mesma Wi‑Fi).
+- O APK de release sai como **`Acervo-release.apk`** (plugin em `plugins/withAcervoApkName.js`).
+
+### Gerar APK (release)
+
+Requisito: **JDK 17** (Java 26 quebra o Gradle).
+
+```bash
+sudo pacman -S jdk17-openjdk
+```
+
+Confirme `.env` com a URL do Render:
+
+```
+EXPO_PUBLIC_API_URL=https://acervo-api.onrender.com
+```
+
+```bash
+pnpm run android:release
+```
+
+Ou manualmente:
+
+```bash
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk
+npx expo prebuild --platform android
+cd android && ./gradlew assembleRelease
+```
 
 ## Scripts
 
