@@ -75,6 +75,7 @@ export function useOpenSignalChat() {
     },
     onSuccess: (data) => {
       void queryClient.invalidateQueries({ queryKey: chatListKey(user?.id) });
+      void queryClient.invalidateQueries({ queryKey: ['library', 'notifications', user?.id] });
       void queryClient.setQueryData(chatThreadKey(user?.id, data.thread.id), data.thread);
       void queryClient.setQueryData(chatMessagesKey(user?.id, data.thread.id), {
         items: data.messages,
@@ -161,6 +162,7 @@ export function useSignalChatRoom(threadId: number) {
         setLiveMessages((prev) => [...prev, message]);
         void queryClient.invalidateQueries({ queryKey: chatMessagesKey(userId, threadId) });
         void queryClient.invalidateQueries({ queryKey: chatListKey(userId) });
+        void queryClient.invalidateQueries({ queryKey: ['library', 'notifications', userId] });
       },
       (isConnected) => setConnected(isConnected),
     );
@@ -196,6 +198,7 @@ export function useSignalChatRoom(threadId: number) {
         setLiveMessages((prev) => [...prev, data]);
         void queryClient.invalidateQueries({ queryKey: chatMessagesKey(userId, threadId) });
         void queryClient.invalidateQueries({ queryKey: chatListKey(userId) });
+        void queryClient.invalidateQueries({ queryKey: ['library', 'notifications', userId] });
         return true;
       } catch {
         return false;

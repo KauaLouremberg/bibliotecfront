@@ -6,6 +6,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { Image, ScrollView, Switch, Text, TouchableOpacity, View } from 'react-native';
 
 import { AnimatedReveal } from '@/components/AnimatedReveal';
+import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { sharingStatusLabels, sharingStatusOptions } from '@/constants/library';
@@ -180,9 +181,7 @@ export default function BookFormScreen() {
         <Text className={`text-center text-base ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]'}`}>
           Livro não encontrado no seu inventário. Atualize a lista e tente novamente.
         </Text>
-        <Button className="mt-5 max-w-[200px]" onPress={() => router.back()}>
-          Voltar
-        </Button>
+        <BackButton className="mt-5" fallbackHref="/(app)/(tabs)" />
       </View>
     );
   }
@@ -190,9 +189,7 @@ export default function BookFormScreen() {
   return (
     <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7]'}`} keyboardShouldPersistTaps="handled">
       <View className="px-5 pb-12" style={{ paddingTop: topInset }}>
-        <TouchableOpacity className={`mb-6 self-start rounded-full border px-4 py-2 ${monochrome ? 'border-neutral-300' : 'border-[#C9A96E]'}`} onPress={() => router.back()}>
-          <Text className={`text-sm font-bold ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>Fechar</Text>
-        </TouchableOpacity>
+        <BackButton className="mb-6" fallbackHref="/(app)/(tabs)" />
         <AnimatedReveal>
           <Text className={`text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>
             {book ? 'Editar livro do inventário' : 'Adicionar livro ao inventário'}

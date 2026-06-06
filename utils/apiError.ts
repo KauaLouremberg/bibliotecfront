@@ -23,6 +23,21 @@ function messageFromDetail(detail: unknown): string | null {
   }
 
   if (Array.isArray(detail)) {
+    const messages = detail
+      .map((item) => {
+        if (item && typeof item === 'object' && 'msg' in item) {
+          const field = 'loc' in item && Array.isArray(item.loc)
+            ? item.loc.filter((part: unknown) => part !== 'body').join('.')
+            : '';
+          const msg = String((item as { msg: string }).msg);
+          return field ? `${field}: ${msg}` : msg;
+        }
+        return null;
+      })
+      .filter(Boolean);
+    if (messages.length > 0) {
+      return messages.join(' ');
+    }
     return null;
   }
 

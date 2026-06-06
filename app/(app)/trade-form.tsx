@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { AnimatedReveal } from '@/components/AnimatedReveal';
+import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
@@ -80,9 +81,7 @@ export default function TradeFormScreen() {
         <Text className={`text-center text-base ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
           Este livro está apenas visível no perfil e não está disponível para negociação.
         </Text>
-        <Button className="mt-5 max-w-[200px]" onPress={() => router.back()}>
-          Voltar
-        </Button>
+        <BackButton className="mt-5" fallbackHref="/(app)/(tabs)/trades" />
       </View>
     );
   }
@@ -90,9 +89,7 @@ export default function TradeFormScreen() {
   return (
     <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`} keyboardShouldPersistTaps="handled">
       <View className="px-5 pb-12" style={{ paddingTop: topInset }}>
-        <TouchableOpacity className={`mb-6 self-start rounded-full border px-4 py-2 ${monochrome ? 'border-neutral-300' : 'border-stone-300 dark:border-stone-600'}`} onPress={() => router.back()}>
-          <Text className={`text-sm font-bold ${monochrome ? 'text-black' : 'text-stone-800 dark:text-stone-200'}`}>Fechar</Text>
-        </TouchableOpacity>
+        <BackButton className="mb-6" fallbackHref="/(app)/(tabs)/trades" />
         <AnimatedReveal>
           <Text className={`text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Proposta de troca</Text>
           <Text className={`mt-2 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>

@@ -4,11 +4,62 @@ import { API_URL, SECURE_ACCESS_KEY, SECURE_REFRESH_KEY } from '@/constants/conf
 import { emitSessionCleared } from '@/utils/authEvents';
 import { deleteSecureItem, getSecureItem, setSecureItem } from '@/utils/secureStorage';
 
+function isFormData(value: unknown): value is FormData {
+  return typeof FormData !== 'undefined' && value instanceof FormData;
+}
+
+function stripContentType(headers: InternalAxiosRequestConfig['headers']) {
+  if (!headers) return;
+  const record = headers as Record<string, unknown> & {
+    setContentType?: (value: string | false) => void;
+    set?: (key: string, value: string | false) => void;
+  };
+  if (typeof record.setContentType === 'function') {
+    record.setContentType(false);
+    return;
+  }
+  if (typeof record.set === 'function') {
+    record.set('Content-Type', false);
+    return;
+  }
+  delete record['Content-Type'];
+  delete record['content-type'];
+}
+
 export const api = axios.create({
   baseURL: API_URL.replace(/\/$/, ''),
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  transformResponse: [
+    (data) => {
+      if (data === '' || data === null || data === undefined) {
+        return null;
+      }
+      if (typeof data === 'string') {
+        try {
+          return JSON.parse(data);
+        } catch {
+          return data;
+        }
+      }
+      return data;
+    },
+  ],
+  transformRequest: [
+    (data, headers) => {
+      if (isFormData(data)) {
+        stripContentType(headers);
+        return data;
+      }
+      if (data !== undefined && data !== null && typeof data === 'object') {
+        if (typeof headers.setContentType === 'function') {
+          headers.setContentType('application/json');
+        } else {
+          (headers as Record<string, string>)['Content-Type'] = 'application/json';
+        }
+        return JSON.stringify(data);
+      }
+      return data;
+    },
+  ],
 });
 
 const raw = axios.create({
@@ -42,17 +93,10 @@ function isPublicAuthPath(url: string | undefined): boolean {
 }
 
 api.interceptors.request.use(async (config) => {
-  if (config.data instanceof FormData && config.headers) {
-    const headers = config.headers as InternalAxiosRequestConfig['headers'] & {
-      setContentType?: (value: string | false) => void;
-    };
-    if (typeof headers.setContentType === 'function') {
-      headers.setContentType(false);
-    } else {
-      delete (headers as Record<string, unknown>)['Content-Type'];
-      delete (headers as Record<string, unknown>)['content-type'];
-    }
+  if (isFormData(config.data)) {
+    stripContentType(config.headers);
   }
+
   if (isPublicAuthPath(config.url)) {
     if (config.headers) {
       delete (config.headers as Record<string, unknown>).Authorization;

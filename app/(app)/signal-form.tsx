@@ -1,19 +1,20 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 
 import { AnimatedReveal } from '@/components/AnimatedReveal';
+import { BackButton } from '@/components/BackButton';
 import { Button } from '@/components/Button';
 import { TextField } from '@/components/TextField';
 import { postIntentOptions } from '@/constants/library';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useAppInsets } from '@/hooks/useAppInsets';
 import {
-  useCommunityFeed,
-  useDeleteSocialPost,
   useMyInventory,
+  useMySignal,
+  useDeleteSocialPost,
   useUpsertSocialPost,
 } from '@/hooks/useLibrary';
 import { useToastOnQueryError } from '@/hooks/useToastOnQueryError';
@@ -48,16 +49,13 @@ export default function SignalFormScreen() {
   const routeBookTitle = firstParam(params.bookTitle) ?? '';
   const routeBookAuthor = firstParam(params.bookAuthor) ?? '';
   const inventoryQuery = useMyInventory();
-  const feedQuery = useCommunityFeed();
+  const mySignalQuery = useMySignal(postId);
   const { data: inventoryData, isPending: inventoryPending } = inventoryQuery;
-  const { data: feedData, isPending: feedPending } = feedQuery;
+  const { data: post, isPending: mySignalPending, isError: mySignalError } = mySignalQuery;
   const upsertMutation = useUpsertSocialPost();
   const deleteMutation = useDeleteSocialPost();
   const actionPending = upsertMutation.isPending || deleteMutation.isPending;
   useToastOnQueryError(inventoryQuery, 'Inventário indisponível', 'Não foi possível carregar seus livros.');
-  useToastOnQueryError(feedQuery, 'Feed indisponível', 'Não foi possível carregar seus sinais.');
-
-  const post = useMemo(() => feedData?.items.find((item) => item.id === postId), [feedData?.items, postId]);
 
   const {
     control,
@@ -102,7 +100,7 @@ export default function SignalFormScreen() {
     }
   }, [intent, selectedInventoryBookId, setValue]);
 
-  if ((postId && feedPending) || inventoryPending) {
+  if ((postId && mySignalPending) || inventoryPending) {
     return (
       <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#4A3520]'}`}>
         <Text className="text-base text-stone-400">Carregando formulário...</Text>
@@ -110,15 +108,13 @@ export default function SignalFormScreen() {
     );
   }
 
-  if (postId && !post) {
+  if (postId && !mySignalPending && (mySignalError || !post)) {
     return (
       <View className={`flex-1 items-center justify-center px-6 ${monochrome ? 'bg-white' : 'bg-[#4A3520]'}`}>
         <Text className="text-center text-base text-stone-400">
           Sinal não encontrado. Ele pode ter sido removido ou não pertence mais ao seu usuário.
         </Text>
-        <Button className="mt-5 max-w-[200px]" onPress={() => router.back()}>
-          Voltar
-        </Button>
+        <BackButton className="mt-5" fallbackHref="/(app)/(tabs)/two" />
       </View>
     );
   }
@@ -126,9 +122,7 @@ export default function SignalFormScreen() {
   return (
     <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#4A3520]'}`} keyboardShouldPersistTaps="handled">
       <View className="px-5 pb-12" style={{ paddingTop: topInset }}>
-        <TouchableOpacity className={`mb-6 self-start rounded-full border px-4 py-2 ${monochrome ? 'border-neutral-300' : 'border-white/20'}`} onPress={() => router.back()}>
-          <Text className={`text-sm font-bold ${monochrome ? 'text-black' : 'text-white'}`}>Fechar</Text>
-        </TouchableOpacity>
+        <BackButton className="mb-6" color={monochrome ? '#111111' : '#F5ECD7'} fallbackHref="/(app)/(tabs)/two" />
         <AnimatedReveal>
           <Text className={`text-3xl font-black leading-tight ${monochrome ? 'text-black' : 'text-white'}`}>
             {post ? 'Editar sinal da comunidade' : 'Publicar sinal no feed'}
@@ -138,13 +132,16 @@ export default function SignalFormScreen() {
           </Text>
         </AnimatedReveal>
 
-        <AnimatedReveal delay={100} className={`mt-6 rounded-[24px] border px-5 py-6 ${monochrome ? 'border-neutral-300 bg-white' : 'border-stone-700 bg-[#4A3520]'}`}>
+        <AnimatedReveal delay={100} className={`mt-6 rounded-[24px] border px-5 py-6 ${monochrome ? 'border-neutral-300 bg-white' : 'border-[#C9A96E]/45 bg-[#E8D5B0]'}`}>
           <Controller
             control={control}
             name="intent"
             render={({ field: { value, onChange } }) => (
               <View className="mb-4">
-                <Text className={`mb-3 text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-stone-300'}`}>Tipo do sinal</Text>
+                <Text className={`mb-1 text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-[#4A3520]'}`}>Tipo do sinal</Text>
+                <Text className={`mb-3 text-xs leading-5 ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]/70'}`}>
+                  Escolha se você procura, oferece, empresta, troca ou doa um livro.
+                </Text>
                 <View className="gap-3">
                   {postIntentOptions.map((option) => {
                     const selected = value === option.value;
@@ -154,12 +151,12 @@ export default function SignalFormScreen() {
                         className={`rounded-2xl border px-4 py-4 ${
                           selected
                             ? monochrome ? 'border-black bg-neutral-100' : 'border-[#8B6534] bg-[#F5ECD7]'
-                            : monochrome ? 'border-neutral-300 bg-white' : 'border-stone-600 bg-stone-800'
+                            : monochrome ? 'border-neutral-300 bg-white' : 'border-[#C9A96E]/70 bg-[#E8D5B0]'
                         }`}
                         disabled={actionPending}
                         onPress={() => onChange(option.value)}>
-                        <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-white'}`}>{option.label}</Text>
-                        <Text className={`mt-1 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-400'}`}>{option.description}</Text>
+                        <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>{option.label}</Text>
+                        <Text className={`mt-1 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]/75'}`}>{option.description}</Text>
                       </TouchableOpacity>
                     );
                   })}
@@ -175,6 +172,8 @@ export default function SignalFormScreen() {
               <TextField
                 ref={ref}
                 label="Título do livro"
+                hint="Nome da obra que aparecerá no feed da comunidade."
+                placeholder="Ex.: Dom Casmurro"
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
@@ -190,6 +189,8 @@ export default function SignalFormScreen() {
               <TextField
                 ref={ref}
                 label="Autor"
+                hint="Autor principal. Ajuda outros usuários a encontrar o título certo."
+                placeholder="Ex.: Machado de Assis"
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
@@ -205,6 +206,7 @@ export default function SignalFormScreen() {
               <TextField
                 ref={ref}
                 label="Local de referência"
+                hint="Opcional. Bairro, campus ou ponto de encontro para facilitar combinações presenciais."
                 placeholder="Ex.: Campus centro, bloco A"
                 value={value}
                 onBlur={onBlur}
@@ -221,6 +223,8 @@ export default function SignalFormScreen() {
               <TextField
                 ref={ref}
                 label="Mensagem"
+                hint="Conte condição do livro, prazo, se aceita troca ou qualquer detalhe útil."
+                placeholder="Ex.: Tenho a edição de bolso, aceito troca por ficção científica..."
                 multiline
                 numberOfLines={5}
                 textAlignVertical="top"
@@ -239,64 +243,89 @@ export default function SignalFormScreen() {
               name="inventory_book_id"
               render={({ field: { value, onChange } }) => (
                 <View className="mb-4">
-                  <Text className={`mb-3 text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-stone-300'}`}>Vincular ao inventário</Text>
+                  <Text className={`mb-1 text-sm font-semibold ${monochrome ? 'text-neutral-900' : 'text-[#4A3520]'}`}>Vincular ao inventário</Text>
+                  <Text className={`mb-3 text-xs leading-5 ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]/70'}`}>
+                    Opcional. Selecione um livro do seu acervo para preencher título e autor automaticamente.
+                  </Text>
                   <TouchableOpacity
                     className={`mb-3 rounded-2xl border px-4 py-4 ${
                       value === null
                         ? monochrome ? 'border-black bg-neutral-100' : 'border-[#8B6534] bg-[#F5ECD7]'
-                        : monochrome ? 'border-neutral-300 bg-white' : 'border-stone-600 bg-stone-800'
+                        : monochrome ? 'border-neutral-300 bg-white' : 'border-[#C9A96E]/70 bg-[#E8D5B0]'
                     }`}
                     disabled={actionPending}
                     onPress={() => onChange(null)}>
-                    <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-white'}`}>Sem vínculo</Text>
-                    <Text className={`mt-1 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-400'}`}>
-                      Use quando o post for apenas um pedido ou um aviso solto.
+                    <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>Sem vínculo</Text>
+                    <Text className={`mt-1 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]/75'}`}>
+                      Publicar só o aviso, sem associar a um item do inventário.
                     </Text>
                   </TouchableOpacity>
 
-                  <View className="gap-3">
-                    {inventoryData?.items.map((bk) => {
-                      const selected = value === bk.id;
-                      return (
-                        <TouchableOpacity
-                          key={bk.id}
-                          className={`rounded-2xl border px-4 py-4 ${
-                            selected
-                              ? monochrome ? 'border-black bg-neutral-100' : 'border-[#8B6534] bg-[#F5ECD7]'
-                              : monochrome ? 'border-neutral-300 bg-white' : 'border-stone-600 bg-stone-800'
-                          }`}
-                          disabled={actionPending}
-                          onPress={() => {
-                            onChange(bk.id);
-                            setValue('book_title', bk.title);
-                            setValue('book_author', bk.author);
-                          }}>
-                          <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-white'}`}>{bk.title}</Text>
-                          <Text className={`mt-1 text-sm ${monochrome ? 'text-neutral-600' : 'text-stone-400'}`}>{bk.author}</Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
+                  {inventoryData?.items.length ? (
+                    <View className="gap-3">
+                      {inventoryData.items.map((bk) => {
+                        const selected = value === bk.id;
+                        return (
+                          <TouchableOpacity
+                            key={bk.id}
+                            className={`rounded-2xl border px-4 py-4 ${
+                              selected
+                                ? monochrome ? 'border-black bg-neutral-100' : 'border-[#8B6534] bg-[#F5ECD7]'
+                                : monochrome ? 'border-neutral-300 bg-white' : 'border-[#C9A96E]/70 bg-[#E8D5B0]'
+                            }`}
+                            disabled={actionPending}
+                            onPress={() => {
+                              onChange(bk.id);
+                              setValue('book_title', bk.title);
+                              setValue('book_author', bk.author);
+                            }}>
+                            <Text className={`text-base font-semibold ${monochrome ? 'text-black' : 'text-[#4A3520]'}`}>{bk.title}</Text>
+                            <Text className={`mt-1 text-sm ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]/75'}`}>{bk.author}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  ) : (
+                    <View className={`rounded-2xl border px-4 py-4 ${monochrome ? 'border-neutral-300 bg-neutral-50' : 'border-[#C9A96E]/70 bg-[#F5ECD7]'}`}>
+                      <Text className={`text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]/75'}`}>
+                        Seu inventário está vazio. Adicione livros na aba Inventário para vinculá-los aqui.
+                      </Text>
+                    </View>
+                  )}
                 </View>
               )}
             />
-          ) : null}
+          ) : (
+            <View className={`mb-4 rounded-2xl border px-4 py-4 ${monochrome ? 'border-neutral-300 bg-neutral-50' : 'border-[#C9A96E]/70 bg-[#F5ECD7]'}`}>
+              <Text className={`text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-[#4A3520]/75'}`}>
+                Sinais do tipo &quot;Preciso&quot; não exigem vínculo com o inventário — basta informar título, autor e mensagem.
+              </Text>
+            </View>
+          )}
 
           <Button
             className="mt-6"
             loading={upsertMutation.isPending}
             disabled={deleteMutation.isPending}
-            onPress={handleSubmit(async (values) => {
-              try {
-                await upsertMutation.mutateAsync({
-                  id: postId,
-                  ...values,
-                });
-                showSuccessToast(post ? 'Sinal atualizado' : 'Sinal publicado', 'A comunidade já pode ver essa informação.');
-                router.back();
-              } catch (error) {
-                showErrorToast('Não foi possível salvar', extractApiErrorMessage(error, 'Revise os dados do sinal e tente novamente.'));
-              }
+            onPress={handleSubmit((values) => {
+              upsertMutation.mutate(
+                { id: postId, ...values },
+                {
+                  onSuccess: () => {
+                    showSuccessToast(
+                      post ? 'Sinal atualizado' : 'Sinal publicado',
+                      post ? 'Suas alterações foram salvas.' : 'Seu sinal aparece em Meus sinais.',
+                    );
+                    router.back();
+                  },
+                  onError: (error) => {
+                    showErrorToast(
+                      'Não foi possível salvar',
+                      extractApiErrorMessage(error, 'Revise os dados do sinal e tente novamente.'),
+                    );
+                  },
+                },
+              );
             })}>
             {post ? 'Salvar sinal' : 'Publicar sinal'}
           </Button>
@@ -307,14 +336,19 @@ export default function SignalFormScreen() {
               className="mt-3"
               loading={deleteMutation.isPending}
               disabled={upsertMutation.isPending}
-              onPress={async () => {
-                try {
-                  await deleteMutation.mutateAsync(post.id);
-                  showSuccessToast('Sinal removido', 'A publicação saiu do feed.');
-                  router.back();
-                } catch (error) {
-                  showErrorToast('Não foi possível remover', extractApiErrorMessage(error, 'Tente novamente em instantes.'));
-                }
+              onPress={() => {
+                deleteMutation.mutate(post.id, {
+                  onSuccess: () => {
+                    showSuccessToast('Sinal removido', 'A publicação saiu da sua lista.');
+                    router.back();
+                  },
+                  onError: (error) => {
+                    showErrorToast(
+                      'Não foi possível remover',
+                      extractApiErrorMessage(error, 'Tente novamente em instantes.'),
+                    );
+                  },
+                });
               }}>
               Remover sinal
             </Button>

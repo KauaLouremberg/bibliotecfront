@@ -20,6 +20,13 @@ export default function AppGroupLayout() {
         }}
       />
       <Stack.Screen
+        name="my-signals"
+        options={{
+          presentation: 'modal',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="signal-form"
         options={{
           presentation: 'modal',
@@ -32,6 +39,14 @@ export default function AppGroupLayout() {
           presentation: 'modal',
           headerShown: false,
         }}
+      />
+      <Stack.Screen
+        name="notifications"
+        options={{ presentation: 'modal', headerShown: false }}
+      />
+      <Stack.Screen
+        name="chats"
+        options={{ presentation: 'modal', headerShown: false }}
       />
       <Stack.Screen
         name="signal-chat/[threadId]"

@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useDeferredValue, useState } from 'react';
+import { Link, router } from 'expo-router';
+import { useCallback, useDeferredValue, useState } from 'react';
 import { Image, RefreshControl, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 import { AnimatedReveal } from '@/components/AnimatedReveal';
@@ -19,10 +19,13 @@ import {
   useDiscoverInventory,
   useMyInventory,
   useRateInventoryBook,
-  type CatalogBook,
 } from '@/hooks/useLibrary';
 import { useToastOnQueryError } from '@/hooks/useToastOnQueryError';
+import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
+import { useShuffleOnFocus } from '@/hooks/useShuffleOnFocus';
+import { useNotifications } from '@/hooks/useNotifications';
 import { extractApiErrorMessage } from '@/utils/apiError';
+import { openCatalogBook } from '@/utils/catalogNavigation';
 import { showErrorToast } from '@/utils/feedback';
 
 function canNegotiate(status: string) {
@@ -36,23 +39,6 @@ function StatTile({ value, label }: { value: number; label: string }) {
       <Text className="mt-1 text-xs uppercase tracking-[1px] text-[#E8D5B0]">{label}</Text>
     </View>
   );
-}
-
-function openCatalogBook(book: CatalogBook) {
-  router.push({
-    pathname: '/(app)/book-form',
-    params: {
-      title: book.title,
-      author: book.author,
-      description: book.description,
-      genre: book.genre,
-      publishedYear: book.published_year ? String(book.published_year) : '',
-      publisher: book.publisher,
-      isbn: book.isbn,
-      pageCount: book.page_count ? String(book.page_count) : '',
-      coverUrl: book.cover_url,
-    },
-  });
 }
 
 export default function InventoryScreen() {
@@ -76,14 +62,29 @@ export default function InventoryScreen() {
     trade_status: tradeStatusFilter,
   });
   const feedQuery = useCommunityFeed();
+  const notificationsQuery = useNotifications();
   const rateMutation = useRateInventoryBook();
   useToastOnQueryError(catalogQuery, 'Catálogo indisponível', 'Não foi possível consultar a Open Library.');
   useToastOnQueryError(inventoryQuery, 'Inventário indisponível', 'Não foi possível carregar seu inventário.');
   useToastOnQueryError(discoverQuery, 'Busca indisponível', 'Não foi possível carregar os livros públicos.');
   useToastOnQueryError(feedQuery, 'Feed indisponível', 'Não foi possível carregar os sinais da comunidade.');
 
+  const refreshScreen = useCallback(
+    () =>
+      Promise.all([
+        catalogQuery.refetch(),
+        inventoryQuery.refetch(),
+        discoverQuery.refetch(),
+        feedQuery.refetch(),
+        notificationsQuery.refetch(),
+      ]),
+    [catalogQuery.refetch, discoverQuery.refetch, feedQuery.refetch, inventoryQuery.refetch, notificationsQuery.refetch],
+  );
+  useRefreshOnFocus(refreshScreen);
+
   const inventory = inventoryQuery.data;
   const catalog = catalogQuery.data;
+  const shuffledCatalogItems = useShuffleOnFocus(catalog?.items ?? []);
   const discover = discoverQuery.data;
   const isRefreshing =
     catalogQuery.isRefetching || inventoryQuery.isRefetching || discoverQuery.isRefetching || feedQuery.isRefetching;
@@ -113,10 +114,7 @@ export default function InventoryScreen() {
           refreshing={isRefreshing}
           tintColor={monochrome ? '#111111' : '#8B6534'}
           onRefresh={() => {
-            void catalogQuery.refetch();
-            void inventoryQuery.refetch();
-            void discoverQuery.refetch();
-            void feedQuery.refetch();
+            void refreshScreen();
           }}
         />
       }>
@@ -155,10 +153,19 @@ export default function InventoryScreen() {
         </AnimatedReveal>
 
         <AnimatedReveal delay={100} className="mt-10">
-          <Text className={`text-2xl font-bold ${heading}`}>Catálogo online</Text>
-          <Text className={`mt-1 text-sm ${muted}`}>
-            Busca em Open Library por título, autor ou gênero. Selecione um resultado para preencher o inventário.
-          </Text>
+          <View className="flex-row items-start justify-between gap-3">
+            <View className="flex-1">
+              <Text className={`text-2xl font-bold ${heading}`}>Catálogo online</Text>
+              <Text className={`mt-1 text-sm ${muted}`}>
+                Busca em Open Library por título, autor ou gênero. Selecione um resultado para preencher o inventário.
+              </Text>
+            </View>
+            <Link href="/(app)/(tabs)/catalog" asChild>
+              <TouchableOpacity className={`rounded-full border px-3 py-2 ${monochrome ? 'border-neutral-300 bg-white' : 'border-[#C9A96E]/70 bg-[#E8D5B0]'}`}>
+                <Text className={`text-xs font-bold ${heading}`}>Vitrine</Text>
+              </TouchableOpacity>
+            </Link>
+          </View>
 
           <View className="mt-5 gap-3">
             <TextInput
@@ -197,13 +204,13 @@ export default function InventoryScreen() {
             <View className={`mt-5 rounded-[24px] border px-5 py-6 ${card}`}>
               <Text className={`text-base ${muted}`}>Consultando catálogo...</Text>
             </View>
-          ) : catalog?.items.length ? (
+          ) : shuffledCatalogItems.length ? (
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               className="mt-5"
               contentContainerClassName="gap-4 pr-5">
-              {catalog.items.map((book) => (
+              {shuffledCatalogItems.map((book) => (
                 <View key={book.id} className={`min-h-[430px] w-[310px] rounded-[24px] border p-5 ${card}`}>
                   <View className="flex-1">
                   <View className="flex-row gap-4">

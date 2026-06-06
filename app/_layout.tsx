@@ -92,7 +92,7 @@ function ToastHost() {
       }}
       textStyle={{ fontWeight: '700' }}
       topOffset={Math.max(insets.top + 12, 24)}
-      useModal
+      useModal={false}
       width="92%"
     />
   );

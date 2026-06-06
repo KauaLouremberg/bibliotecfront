@@ -1,21 +1,25 @@
+import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { BackHandler, Platform } from 'react-native';
 
-import { useAuth } from '@/hooks/useAuth';
-
+/**
+ * No Android, o botão voltar deve fechar modais/telas empilhadas antes de sair do app.
+ * O logout fica apenas no menu do perfil.
+ */
 export function useAuthenticatedBackGuard() {
-  const { isAuthenticated, logout } = useAuth();
-
   useEffect(() => {
-    if (!isAuthenticated || Platform.OS === 'web') {
+    if (Platform.OS === 'web') {
       return undefined;
     }
 
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-      void logout();
-      return true;
+      if (router.canGoBack()) {
+        router.back();
+        return true;
+      }
+      return false;
     });
 
     return () => subscription.remove();
-  }, [isAuthenticated, logout]);
+  }, []);
 }

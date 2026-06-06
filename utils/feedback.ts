@@ -56,7 +56,7 @@ function showToast(type: ToastKind, title: string, message?: string) {
     iconColor: colors.iconColor,
     progressBarColor: colors.progressBarColor,
     textColor: colors.textColor,
-    useModal: true,
+    useModal: false,
   });
 }
 

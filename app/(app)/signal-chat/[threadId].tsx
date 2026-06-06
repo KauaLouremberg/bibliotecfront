@@ -12,6 +12,7 @@ import {
   View,
 } from 'react-native';
 
+import { BackButton } from '@/components/BackButton';
 import { postIntentLabels } from '@/constants/library';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useAppInsets } from '@/hooks/useAppInsets';
@@ -124,9 +125,7 @@ export default function SignalChatScreen() {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
       <View className="border-b border-stone-200 px-5 pb-4 dark:border-stone-700" style={{ paddingTop: topInset }}>
         <View className="mb-3 flex-row items-center justify-between">
-          <TouchableOpacity onPress={() => router.back()}>
-            <Text className={`text-sm font-bold ${heading}`}>← Voltar</Text>
-          </TouchableOpacity>
+          <BackButton color={monochrome ? '#111' : '#4A3520'} fallbackHref="/(app)/chats" />
           <TouchableOpacity
             disabled={closeChat.isPending}
             onPress={confirmCloseChat}

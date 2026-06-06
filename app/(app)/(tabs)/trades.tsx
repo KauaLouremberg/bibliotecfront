@@ -1,5 +1,6 @@
-import { ScrollView, Text, View } from 'react-native';
-import { useState } from 'react';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { ScrollView, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
+import { useCallback, useState } from 'react';
 
 import { AnimatedReveal } from '@/components/AnimatedReveal';
 import { Button } from '@/components/Button';
@@ -7,6 +8,7 @@ import { Pill } from '@/components/Pill';
 import { tradeStatusLabels, tradeStatusTones } from '@/constants/library';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useMyTrades, useUpdateTradeRequestStatus, type TradeRequest } from '@/hooks/useLibrary';
+import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 import { useToastOnQueryError } from '@/hooks/useToastOnQueryError';
 import { extractApiErrorMessage } from '@/utils/apiError';
 import { showErrorToast, showSuccessToast } from '@/utils/feedback';
@@ -89,6 +91,9 @@ export default function TradesScreen() {
   const { monochrome } = useInterfaceMode();
   useToastOnQueryError(tradesQuery, 'Negociações indisponíveis', 'Não foi possível carregar suas negociações.');
 
+  const refreshTrades = useCallback(() => tradesQuery.refetch(), [tradesQuery.refetch]);
+  useRefreshOnFocus(refreshTrades);
+
   const incoming = tradesQuery.data?.incoming ?? [];
   const outgoing = tradesQuery.data?.outgoing ?? [];
 
@@ -112,13 +117,45 @@ export default function TradesScreen() {
   }
 
   return (
-    <ScrollView className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`}>
+    <ScrollView
+      className={`flex-1 ${monochrome ? 'bg-white' : 'bg-[#F5ECD7] dark:bg-[#4A3520]'}`}
+      refreshControl={
+        <RefreshControl
+          refreshing={tradesQuery.isRefetching && !tradesQuery.isPending}
+          tintColor={monochrome ? '#171717' : '#8B6534'}
+          onRefresh={() => {
+            void refreshTrades();
+          }}
+        />
+      }>
       <View className="px-5 pb-4 pt-4">
         <AnimatedReveal>
-          <Text className={`text-3xl font-black ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>Negociações</Text>
-          <Text className={`mt-2 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
-            Acompanhe propostas enviadas e recebidas sem sair do app.
-          </Text>
+          <View className="flex-row items-start justify-between gap-3">
+            <View className="flex-1">
+              <Text className={`text-3xl font-black ${monochrome ? 'text-black' : 'text-[#4A3520] dark:text-white'}`}>
+                Negociações
+              </Text>
+              <Text className={`mt-2 text-sm leading-6 ${monochrome ? 'text-neutral-600' : 'text-stone-600 dark:text-stone-400'}`}>
+                Acompanhe propostas enviadas e recebidas sem sair do app.
+              </Text>
+            </View>
+            <TouchableOpacity
+              accessibilityLabel="Atualizar negociações"
+              className={`h-11 w-11 items-center justify-center rounded-full border ${
+                monochrome ? 'border-neutral-300 bg-neutral-50' : 'border-stone-200 bg-white dark:border-stone-600 dark:bg-stone-800'
+              }`}
+              disabled={tradesQuery.isRefetching}
+              onPress={() => {
+                void refreshTrades();
+              }}>
+              <FontAwesome
+                name="refresh"
+                size={18}
+                color={monochrome ? '#171717' : '#8B6534'}
+                style={{ opacity: tradesQuery.isRefetching ? 0.45 : 1 }}
+              />
+            </TouchableOpacity>
+          </View>
         </AnimatedReveal>
 
         <AnimatedReveal delay={100} className="mt-8">
