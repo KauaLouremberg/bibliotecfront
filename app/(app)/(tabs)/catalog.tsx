@@ -23,6 +23,7 @@ import { useInfiniteCatalogBooks } from '@/hooks/useLibrary';
 import { useRefreshOnFocus } from '@/hooks/useRefreshOnFocus';
 import { useToastOnQueryError } from '@/hooks/useToastOnQueryError';
 import { openCatalogBook } from '@/utils/catalogNavigation';
+import { formatGenreLabel } from '@/utils/genreLabels';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const H_PADDING = 20;
@@ -35,7 +36,7 @@ const LOAD_MORE_THRESHOLD = 240;
 function groupByGenre<T extends { genre: string }>(items: T[]) {
   const groups = new Map<string, T[]>();
   for (const item of items) {
-    const key = item.genre?.trim() || 'Descobertas';
+    const key = formatGenreLabel(item.genre) || 'Descobertas';
     const bucket = groups.get(key);
     if (bucket) bucket.push(item);
     else groups.set(key, [item]);
@@ -50,7 +51,7 @@ function formatCount(count: number) {
 function allResultsLabel(search: string, genre: string, total: number) {
   const suffix = total === 1 ? '1 livro' : `${formatCount(total)} livros`;
   if (search) return `Resultados para "${search}" · ${suffix}`;
-  if (genre) return `Resultados em ${genre} · ${suffix}`;
+  if (genre) return `Resultados em ${formatGenreLabel(genre)} · ${suffix}`;
   return `Todos os livros · ${suffix}`;
 }
 
@@ -139,7 +140,7 @@ export default function CatalogScreen() {
           className={`w-full rounded-2xl border px-4 py-3.5 text-base ${input}`}
         />
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="mt-3" contentContainerClassName="gap-2 pr-5">
-          {[{ label: 'Todos', value: '' }, ...genres.map((g) => ({ label: g, value: g }))].map((option) => {
+          {[{ label: 'Todos', value: '' }, ...genres.map((g) => ({ label: formatGenreLabel(g), value: g }))].map((option) => {
             const selected = genre === option.value;
             return (
               <TouchableOpacity
@@ -180,7 +181,9 @@ export default function CatalogScreen() {
                     className="absolute inset-x-0 bottom-0 px-5 pb-5 pt-16"
                     style={{ backgroundColor: monochrome ? 'rgba(0,0,0,0.55)' : 'rgba(26,18,8,0.82)' }}>
                     {featured.genre ? (
-                      <Text className="text-xs font-bold uppercase tracking-[1px] text-[#C9A96E]">{featured.genre}</Text>
+                      <Text className="text-xs font-bold uppercase tracking-[1px] text-[#C9A96E]">
+                        {formatGenreLabel(featured.genre)}
+                      </Text>
                     ) : null}
                     <Text className="mt-2 text-2xl font-bold leading-8 text-white">{featured.title}</Text>
                     <Text className="mt-1 text-sm text-[#E8D5B0]/90">{featured.author}</Text>

@@ -1,11 +1,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
-  KeyboardAvoidingView,
-  Platform,
   Text,
   TextInput,
   TouchableOpacity,
@@ -16,6 +14,7 @@ import { BackButton } from '@/components/BackButton';
 import { postIntentLabels } from '@/constants/library';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useAppInsets } from '@/hooks/useAppInsets';
+import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { useCloseSignalChat, useSignalChatRoom, useSignalChatThread } from '@/hooks/useSignalChat';
 import { extractApiErrorMessage } from '@/utils/apiError';
 import { showErrorToast, showSuccessToast } from '@/utils/feedback';
@@ -37,7 +36,10 @@ export default function SignalChatScreen() {
   const { threadId: threadIdParam } = useLocalSearchParams<{ threadId: string }>();
   const threadId = Number(threadIdParam);
   const { monochrome } = useInterfaceMode();
-  const { topInset } = useAppInsets();
+  const { topInset, insets } = useAppInsets();
+  const keyboardHeight = useKeyboardHeight();
+  const listRef = useRef<FlatList>(null);
+  const inputBottomPad = keyboardHeight > 0 ? keyboardHeight - insets.bottom : insets.bottom;
   const threadQuery = useSignalChatThread(Number.isFinite(threadId) ? threadId : null);
   const { messages, connected, isLoading, sendMessage, userId } = useSignalChatRoom(threadId);
   const closeChat = useCloseSignalChat();
@@ -58,6 +60,12 @@ export default function SignalChatScreen() {
   const bookTitle = thread?.post.book_title ?? 'Sinal';
   const bookAuthor = thread?.post.book_author;
   const intentLabel = thread ? postIntentLabels[thread.post.intent as keyof typeof postIntentLabels] : null;
+
+  useEffect(() => {
+    if (keyboardHeight > 0 && messages.length > 0) {
+      listRef.current?.scrollToEnd({ animated: true });
+    }
+  }, [keyboardHeight, messages.length]);
 
   const headerSubtitle = useMemo(() => {
     if (threadQuery.isLoading) return 'Carregando conversa…';
@@ -119,10 +127,7 @@ export default function SignalChatScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      className={`flex-1 ${pageBg}`}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 8 : 0}>
+    <View className={`flex-1 ${pageBg}`}>
       <View className="border-b border-stone-200 px-5 pb-4 dark:border-stone-700" style={{ paddingTop: topInset }}>
         <View className="mb-3 flex-row items-center justify-between">
           <BackButton color={monochrome ? '#111' : '#4A3520'} fallbackHref="/(app)/chats" />
@@ -155,10 +160,18 @@ export default function SignalChatScreen() {
         </View>
       ) : (
         <FlatList
+          ref={listRef}
           className="flex-1 px-4"
           data={messages}
           keyExtractor={(item) => String(item.id)}
           contentContainerClassName="py-4"
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
+          onContentSizeChange={() => {
+            if (keyboardHeight > 0) {
+              listRef.current?.scrollToEnd({ animated: true });
+            }
+          }}
           renderItem={({ item }) => {
             const mine = item.sender_id === userId;
             return (
@@ -185,7 +198,7 @@ export default function SignalChatScreen() {
         />
       )}
 
-      <View className={`border-t px-4 py-3 ${inputBg}`}>
+      <View className={`border-t px-4 pt-3 ${inputBg}`} style={{ paddingBottom: Math.max(inputBottomPad, 12) }}>
         <View className="flex-row items-end gap-2">
           <TextInput
             className={`max-h-28 min-h-[44px] flex-1 rounded-2xl border px-4 py-3 text-base ${inputBg} ${heading}`}
@@ -204,6 +217,6 @@ export default function SignalChatScreen() {
           </TouchableOpacity>
         </View>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }

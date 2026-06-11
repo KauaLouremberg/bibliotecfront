@@ -10,6 +10,7 @@ import {
   sharingStatusLabels,
   sharingStatusTones,
 } from '@/constants/library';
+import { formatGenreLabel } from '@/utils/genreLabels';
 import { APP_NAME } from '@/constants/brand';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useAuth } from '@/hooks/useAuth';
@@ -176,7 +177,7 @@ export default function InventoryScreen() {
               className={`w-full rounded-2xl border px-4 py-3.5 text-base ${input}`}
             />
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 pr-5">
-              {[{ label: 'Todos', value: '' }, ...(catalog?.genres ?? []).map((genre) => ({ label: genre, value: genre }))].map((option) => {
+              {[{ label: 'Todos', value: '' }, ...(catalog?.genres ?? []).map((genre) => ({ label: formatGenreLabel(genre), value: genre }))].map((option) => {
                 const selected = catalogGenre === option.value;
                 return (
                   <TouchableOpacity
@@ -222,7 +223,7 @@ export default function InventoryScreen() {
                       </View>
                     )}
                     <View className="flex-1">
-                      {book.genre ? <Pill label={book.genre} tone="accent" /> : null}
+                      {book.genre ? <Pill label={formatGenreLabel(book.genre)} tone="accent" /> : null}
                       <Text className={`mt-3 text-lg font-bold leading-6 ${heading}`}>{book.title}</Text>
                       <Text className={`mt-1 text-sm ${muted}`}>{book.author}</Text>
                       {book.published_year || book.publisher ? (
@@ -304,7 +305,9 @@ export default function InventoryScreen() {
 
                       <Text className={`mt-3 text-xl font-bold ${heading}`}>{book.title}</Text>
                       <Text className={`mt-1 text-sm ${muted}`}>{book.author}</Text>
-                      {book.genre ? <Text className={`mt-1 text-xs font-semibold ${muted}`}>{book.genre}</Text> : null}
+                      {book.genre ? (
+                        <Text className={`mt-1 text-xs font-semibold ${muted}`}>{formatGenreLabel(book.genre)}</Text>
+                      ) : null}
 
                       <View className="mt-3">
                         <StarRating
@@ -452,7 +455,9 @@ export default function InventoryScreen() {
 
                   <Text className={`mt-5 text-xl font-bold ${heading}`}>{book.title}</Text>
                   <Text className={`mt-1 text-sm ${muted}`}>{book.author}</Text>
-                  {book.genre ? <Text className={`mt-1 text-xs font-semibold ${muted}`}>{book.genre}</Text> : null}
+                  {book.genre ? (
+                    <Text className={`mt-1 text-xs font-semibold ${muted}`}>{formatGenreLabel(book.genre)}</Text>
+                  ) : null}
                   <View className="mt-3">
                     <StarRating
                       value={book.my_rating}
