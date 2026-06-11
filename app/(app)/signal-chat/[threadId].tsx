@@ -9,15 +9,22 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {
+  KeyboardProvider,
+  KeyboardStickyView,
+  useKeyboardState,
+} from 'react-native-keyboard-controller';
 
 import { BackButton } from '@/components/BackButton';
 import { postIntentLabels } from '@/constants/library';
 import { useInterfaceMode } from '@/contexts/InterfaceContext';
 import { useAppInsets } from '@/hooks/useAppInsets';
-import { useKeyboardHeight } from '@/hooks/useKeyboardHeight';
 import { useCloseSignalChat, useSignalChatRoom, useSignalChatThread } from '@/hooks/useSignalChat';
 import { extractApiErrorMessage } from '@/utils/apiError';
 import { showErrorToast, showSuccessToast } from '@/utils/feedback';
+
+const CHAT_INPUT_NATIVE_ID = 'signal-chat-input';
+const MIN_COMPOSER_HEIGHT = 72;
 
 function formatTime(value: string) {
   return new Intl.DateTimeFormat('pt-BR', {
@@ -37,9 +44,9 @@ export default function SignalChatScreen() {
   const threadId = Number(threadIdParam);
   const { monochrome } = useInterfaceMode();
   const { topInset, insets } = useAppInsets();
-  const keyboardHeight = useKeyboardHeight();
+  const keyboardHeight = useKeyboardState((state) => (state.isVisible ? state.height : 0));
   const listRef = useRef<FlatList>(null);
-  const inputBottomPad = keyboardHeight > 0 ? keyboardHeight - insets.bottom : insets.bottom;
+  const [composerHeight, setComposerHeight] = useState(MIN_COMPOSER_HEIGHT);
   const threadQuery = useSignalChatThread(Number.isFinite(threadId) ? threadId : null);
   const { messages, connected, isLoading, sendMessage, userId } = useSignalChatRoom(threadId);
   const closeChat = useCloseSignalChat();
@@ -52,6 +59,9 @@ export default function SignalChatScreen() {
   const bubbleMine = monochrome ? 'bg-black' : 'bg-[#4A3520]';
   const bubbleOther = monochrome ? 'bg-neutral-100' : 'bg-white dark:bg-stone-800';
   const inputBg = monochrome ? 'border-neutral-300 bg-white' : 'border-stone-300 bg-white dark:border-stone-600 dark:bg-stone-900';
+
+  const stickyOffset = useMemo(() => ({ closed: 0, opened: 0 }), []);
+  const listBottomPad = keyboardHeight > 0 ? composerHeight + keyboardHeight : composerHeight + 8;
 
   const thread = threadQuery.data;
   const otherName = thread
@@ -127,6 +137,7 @@ export default function SignalChatScreen() {
   }
 
   return (
+    <KeyboardProvider preserveEdgeToEdge>
     <View className={`flex-1 ${pageBg}`}>
       <View className="border-b border-stone-200 px-5 pb-4 dark:border-stone-700" style={{ paddingTop: topInset }}>
         <View className="mb-3 flex-row items-center justify-between">
@@ -154,69 +165,83 @@ export default function SignalChatScreen() {
         </View>
       </View>
 
-      {isLoading || threadQuery.isLoading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator color={monochrome ? '#111' : '#8B6534'} />
-        </View>
-      ) : (
-        <FlatList
-          ref={listRef}
-          className="flex-1 px-4"
-          data={messages}
-          keyExtractor={(item) => String(item.id)}
-          contentContainerClassName="py-4"
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="interactive"
-          onContentSizeChange={() => {
-            if (keyboardHeight > 0) {
-              listRef.current?.scrollToEnd({ animated: true });
-            }
-          }}
-          renderItem={({ item }) => {
-            const mine = item.sender_id === userId;
-            return (
-              <View className={`mb-3 max-w-[85%] ${mine ? 'self-end' : 'self-start'}`}>
-                <Text className={`mb-1 text-xs font-semibold ${mine ? 'text-right' : ''} ${muted}`}>
-                  {item.sender_name}
-                </Text>
-                <View className={`rounded-2xl px-4 py-3 ${mine ? bubbleMine : bubbleOther}`}>
-                  <Text className={`text-base leading-6 ${mine ? 'text-white' : heading}`}>{item.body}</Text>
+      <View className="flex-1">
+        {isLoading || threadQuery.isLoading ? (
+          <View className="flex-1 items-center justify-center">
+            <ActivityIndicator color={monochrome ? '#111' : '#8B6534'} />
+          </View>
+        ) : (
+          <FlatList
+            ref={listRef}
+            className="flex-1 px-4"
+            data={messages}
+            keyExtractor={(item) => String(item.id)}
+            contentContainerStyle={{ paddingTop: 16, paddingBottom: listBottomPad }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
+            onContentSizeChange={() => {
+              if (keyboardHeight > 0) {
+                listRef.current?.scrollToEnd({ animated: true });
+              }
+            }}
+            renderItem={({ item }) => {
+              const mine = item.sender_id === userId;
+              return (
+                <View className={`mb-3 max-w-[85%] ${mine ? 'self-end' : 'self-start'}`}>
+                  <Text className={`mb-1 text-xs font-semibold ${mine ? 'text-right' : ''} ${muted}`}>
+                    {item.sender_name}
+                  </Text>
+                  <View className={`rounded-2xl px-4 py-3 ${mine ? bubbleMine : bubbleOther}`}>
+                    <Text className={`text-base leading-6 ${mine ? 'text-white' : heading}`}>{item.body}</Text>
+                  </View>
+                  <Text className={`mt-1 text-[11px] ${muted} ${mine ? 'text-right' : ''}`}>
+                    {formatTime(item.created_at)}
+                  </Text>
                 </View>
-                <Text className={`mt-1 text-[11px] ${muted} ${mine ? 'text-right' : ''}`}>
-                  {formatTime(item.created_at)}
+              );
+            }}
+            ListEmptyComponent={
+              <View className="flex-1 items-center justify-center px-6 py-16">
+                <Text className={`text-center text-base ${muted}`}>
+                  Envie a primeira mensagem para {otherName} sobre «{bookTitle}».
                 </Text>
               </View>
-            );
-          }}
-          ListEmptyComponent={
-            <View className="flex-1 items-center justify-center px-6 py-16">
-              <Text className={`text-center text-base ${muted}`}>
-                Envie a primeira mensagem para {otherName} sobre «{bookTitle}».
-              </Text>
-            </View>
-          }
-        />
-      )}
-
-      <View className={`border-t px-4 pt-3 ${inputBg}`} style={{ paddingBottom: Math.max(inputBottomPad, 12) }}>
-        <View className="flex-row items-end gap-2">
-          <TextInput
-            className={`max-h-28 min-h-[44px] flex-1 rounded-2xl border px-4 py-3 text-base ${inputBg} ${heading}`}
-            placeholder={`Mensagem para ${otherName}…`}
-            placeholderTextColor={monochrome ? '#737373' : '#78716c'}
-            value={draft}
-            onChangeText={setDraft}
-            multiline
-            editable={!sending}
+            }
           />
-          <TouchableOpacity
-            className={`rounded-2xl px-4 py-3 ${monochrome ? 'bg-black' : 'bg-[#8B6534]'} ${sending ? 'opacity-60' : ''}`}
-            disabled={sending}
-            onPress={() => void handleSend()}>
-            <Text className="font-bold text-white">{sending ? '…' : 'Enviar'}</Text>
-          </TouchableOpacity>
-        </View>
+        )}
+
+        <KeyboardStickyView offset={stickyOffset}>
+          <View
+            className={`border-t px-4 pt-3 ${inputBg}`}
+            style={{ paddingBottom: Math.max(insets.bottom, 12) }}
+            onLayout={(event) => {
+              const nextHeight = event.nativeEvent.layout.height;
+              if (nextHeight > 0 && Math.abs(nextHeight - composerHeight) > 1) {
+                setComposerHeight(nextHeight);
+              }
+            }}>
+            <View className="flex-row items-end gap-2">
+              <TextInput
+                nativeID={CHAT_INPUT_NATIVE_ID}
+                className={`max-h-28 min-h-[44px] flex-1 rounded-2xl border px-4 py-3 text-base ${inputBg} ${heading}`}
+                placeholder={`Mensagem para ${otherName}…`}
+                placeholderTextColor={monochrome ? '#737373' : '#78716c'}
+                value={draft}
+                onChangeText={setDraft}
+                multiline
+                editable={!sending}
+              />
+              <TouchableOpacity
+                className={`rounded-2xl px-4 py-3 ${monochrome ? 'bg-black' : 'bg-[#8B6534]'} ${sending ? 'opacity-60' : ''}`}
+                disabled={sending}
+                onPress={() => void handleSend()}>
+                <Text className="font-bold text-white">{sending ? '…' : 'Enviar'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardStickyView>
       </View>
     </View>
+    </KeyboardProvider>
   );
 }
